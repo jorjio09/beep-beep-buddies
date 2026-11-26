@@ -172,7 +172,21 @@ body.racing #pcorner .gearIco{opacity:0}
 .cliplist{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
 .clip{display:inline-flex;align-items:center;gap:4px;background:#fff;border:1px solid #f0c8d2;border-radius:99px;padding:4px 6px 4px 10px;font-size:14px}
 .clip button{border:none;background:#f3f3f3;border-radius:99px;padding:6px 10px;font-size:14px}
-.recbtn{padding:10px 14px;font-size:15px;font-weight:700;border-radius:10px;border:none;background:#ff4f7a;color:#fff}
+.recrow{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.recbtn{padding:12px 18px;font-size:17px;font-weight:700;border-radius:12px;border:none;background:#ff4f7a;color:#fff;-webkit-appearance:none;appearance:none}
+.recfile{position:relative;overflow:hidden;display:inline-block;padding:11px 14px;font:600 15px system-ui,sans-serif;border-radius:12px;background:#eef3ff;border:1px solid #cdd8f5;color:#223}
+.recfile input{position:absolute;inset:0;opacity:0;width:100%;height:100%;font-size:40px}
+/* recording window */
+#recOv{position:fixed;inset:0;z-index:260;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;padding:12px}
+#recOv.on{display:flex}
+.recbox{background:#fff;border-radius:22px;padding:18px 20px;width:min(92vw,420px);text-align:center;font-family:system-ui,sans-serif;color:#222}
+#recIcon{font-size:44px;line-height:1.1}
+#recOv[data-mode=recording] #recIcon{animation:pulse 1s infinite}
+#recCount{font:900 40px system-ui,sans-serif;color:#c00;min-height:0}
+#recText{font-size:16px;line-height:1.4;margin:6px 0 12px}
+#recStop,#recClose{border:none;border-radius:14px;font:700 19px system-ui,sans-serif;padding:13px 26px;color:#fff}
+#recStop{background:#c00}
+#recClose{background:#2b8ce0}
 .recbtn.rec{background:#c00;animation:pulse 1s infinite}
 .recbtn:disabled{background:#ccc}
 .prow{display:flex;align-items:center;gap:8px;font-size:14px;padding:3px 0}
@@ -304,6 +318,16 @@ body.racing #pcorner .gearIco{opacity:0}
   </div>
 </div>
 
+<div id="recOv">
+  <div class="recbox">
+    <div id="recIcon">🎙️</div>
+    <div id="recCount"></div>
+    <div id="recText"></div>
+    <button id="recStop">■ Stop</button>
+    <button id="recClose">OK</button>
+  </div>
+</div>
+
 <div id="gate">
   <div class="gatecard">
     <button id="gateClose" class="gx">✕</button>
@@ -332,8 +356,11 @@ body.racing #pcorner .gearIco{opacity:0}
     </section>
     <section class="psec" id="sec-voice"><h3 class="ph">❤️ Family voice</h3>
       <p class="pnote">Record your own voice! The game plays it when he gets a question right, or to cheer him on when he misses one. Up to 3 recordings each, about 5 seconds max. <b>Recordings stay on this phone only</b>, so record on each phone.</p>
-      <div class="recblock" data-slot="right"><b>When the answer is right</b> <i>e.g. “¡Eso es!”</i><div class="cliplist"></div><button class="recbtn">● Record</button></div>
-      <div class="recblock" data-slot="wrong"><b>When the answer is wrong</b> <i>e.g. “¡Sigue, que tú puedes!”</i><div class="cliplist"></div><button class="recbtn">● Record</button></div>
+      <div class="recblock" data-slot="right"><b>When the answer is right</b> <i>e.g. “¡Eso es!”</i><div class="cliplist"></div>
+        <div class="recrow"><button class="recbtn">● Record</button><label class="recfile">📁 Use a voice memo<input type="file" accept="audio/*,.m4a,.mp3,.wav,.aac"></label></div></div>
+      <div class="recblock" data-slot="wrong"><b>When the answer is wrong</b> <i>e.g. “¡Sigue, que tú puedes!”</i><div class="cliplist"></div>
+        <div class="recrow"><button class="recbtn">● Record</button><label class="recfile">📁 Use a voice memo<input type="file" accept="audio/*,.m4a,.mp3,.wav,.aac"></label></div></div>
+      <p class="pnote"><b>If ● Record doesn’t work:</b> open the iPhone <b>Voice Memos</b> app, record “¡Eso es!”, tap the recording → <b>•••</b> → <b>Save to Files</b>. Then come back here and tap <b>📁 Use a voice memo</b>.</p>
       <div id="recMsg" class="pnote"></div>
     </section>
     <section class="psec" id="sec-time"><h3 class="ph">⏰ Play time</h3>
@@ -504,10 +531,12 @@ function save(){try{localStorage.setItem(SAVE_KEY,JSON.stringify(S))}catch(e){}}
 
 /* ---------- audio ---------- */
 let AC=null,master=null;
+let micBusy=false;
 function audioInit(){
   if(!AC){const C=window.AudioContext||window.webkitAudioContext;if(!C)return;AC=new C();master=AC.createGain();master.gain.value=.5;master.connect(AC.destination)}
   if(AC.state==='suspended')AC.resume();
-  try{if(navigator.audioSession)navigator.audioSession.type='playback'}catch(e){}
+  // 'playback' lets sounds play with the silent switch on — but it blocks the microphone, so skip it while recording
+  if(!micBusy)try{if(navigator.audioSession)navigator.audioSession.type='playback'}catch(e){}
 }
 function tone(f,d,o={}){
   if(!AC||!S.settings.sound)return;
@@ -1223,9 +1252,11 @@ async function loadClips(){try{CLIPS=(await VDB.all())||[]}catch(e){CLIPS=[]}}
 function trimRange(buf){const d=buf.getChannelData(0),sr=buf.sampleRate;let peak=0;for(let i=0;i<d.length;i+=4)peak=Math.max(peak,Math.abs(d[i]));
   const th=Math.max(.015,peak*.08);let a=0,b=d.length-1;while(a<d.length&&Math.abs(d[a])<th)a++;while(b>a&&Math.abs(d[b])<th)b--;
   a=Math.max(0,a-sr*.06);b=Math.min(d.length,b+sr*.15);if(b<=a){a=0;b=d.length}return [a/sr,b/sr]}
+// works with both old (callback) and new (promise) Safari versions, without stray errors
+function decodeAudio(buf){return new Promise((res,rej)=>{const p=AC.decodeAudioData(buf.slice(0),res,rej);if(p&&p.catch)p.catch(rej)})}
 async function playClipObj(c){
   audioInit();if(!AC||!c)return;
-  try{if(!c.buf){c.buf=await new Promise((res,rej)=>AC.decodeAudioData(c.data.slice(0),res,rej));c.trim=trimRange(c.buf)}
+  try{if(!c.buf){c.buf=await decodeAudio(c.data);c.trim=trimRange(c.buf)}
     const src=AC.createBufferSource(),g=AC.createGain();src.buffer=c.buf;g.gain.value=1.3;src.connect(g);g.connect(AC.destination);
     const [st,en]=c.trim;src.start(0,st,en-st);await new Promise(r=>{src.onended=r;setTimeout(r,(en-st)*1000+400)});
   }catch(e){}
@@ -1240,24 +1271,66 @@ function renderClips(){
     const btn=bl.querySelector('.recbtn'),mine=recState&&recState.slot===slot;
     btn.disabled=(list.length>=3&&!mine)||(recState&&!mine);btn.classList.toggle('rec',!!mine);btn.textContent=mine?'■ Stop':list.length>=3?'Full (3 max)':'● Record'});
 }
-async function toggleRec(slot){
-  const msg=$('#recMsg');if(recState){stopRec();return}
-  if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia||!window.MediaRecorder){msg.textContent='Recording is not supported here. Make sure the iPhone is up to date and the game is opened in Safari.';return}
-  try{
-    audioInit();hush();
-    const stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true}});
-    const mime=['audio/mp4','audio/aac','audio/webm;codecs=opus','audio/webm'].find(m=>MediaRecorder.isTypeSupported&&MediaRecorder.isTypeSupported(m))||'';
-    const rec=new MediaRecorder(stream,mime?{mimeType:mime}:undefined),chunks=[];
-    rec.ondataavailable=e=>{if(e.data&&e.data.size)chunks.push(e.data)};
-    rec.onstop=async()=>{stream.getTracks().forEach(tk=>tk.stop());
-      try{const type=rec.mimeType||mime||'audio/mp4',data=await new Blob(chunks,{type}).arrayBuffer();const c={id:String(Date.now()),slot,mime:type,data};
-        await VDB.put(c);await loadClips();msg.textContent='Saved! This is how it will sound:';const saved=CLIPS.find(x=>x.id===c.id);recState=null;renderClips();if(saved)playClipObj(saved)}
-      catch(err){recState=null;renderClips();msg.textContent='Could not save the recording on this phone.'}};
-    rec.start();recState={slot,rec,timer:setTimeout(stopRec,5000)};msg.textContent='🔴 Recording… say it now! (stops by itself after 5 seconds)';renderClips();
-  }catch(err){recState=null;renderClips();msg.textContent='The microphone is blocked. Tap Allow when the iPhone asks, or turn on the microphone for Safari in Settings, then try again.'}
+// Big window in the middle of the screen that shows what the recorder is doing
+let recTick=null;
+function recUI(mode,text){
+  const ov=$('#recOv');clearInterval(recTick);
+  if(!mode){ov.classList.remove('on');return}
+  ov.classList.add('on');ov.dataset.mode=mode;
+  const icon={starting:'🎙️',recording:'🔴',saved:'✅',error:'⚠️'}[mode];
+  $('#recIcon').textContent=icon;$('#recText').textContent=text||'';
+  $('#recStop').style.display=mode==='recording'?'':'none';$('#recClose').style.display=mode==='recording'||mode==='starting'?'none':'';
+  $('#recCount').textContent='';
+  if(mode==='recording'){let s=5;$('#recCount').textContent=s;recTick=setInterval(()=>{s--;$('#recCount').textContent=Math.max(0,s)},1000)}
 }
-function stopRec(){if(!recState)return;clearTimeout(recState.timer);try{recState.rec.stop()}catch(e){recState=null;renderClips()}}
-document.querySelectorAll('.recbtn').forEach(b=>b.onclick=()=>toggleRec(b.closest('.recblock').dataset.slot));
+function restoreSession(){micBusy=false;try{if(navigator.audioSession)navigator.audioSession.type='playback'}catch(e){}}
+function micErrorText(err){const n=(err&&err.name)||'';
+  if(n==='NotAllowedError'||n==='SecurityError')return 'The microphone was not allowed. Close the game completely (swipe it away), open it again and tap Allow when the iPhone asks. If it never asks: iPhone Settings → Apps → Safari → Microphone → Ask. Or use “📁 Use a voice memo” instead.';
+  if(n==='NotFoundError')return 'No microphone was found on this device.';
+  return `The microphone could not start (${n||err}). Close the game completely, open it again and try once more — or use “📁 Use a voice memo” instead.`}
+async function saveClip(slot,mime,data){
+  if(CLIPS.filter(c=>c.slot===slot).length>=3)throw new Error('full');
+  const c={id:String(Date.now()),slot,mime,data};await VDB.put(c);await loadClips();renderClips();return CLIPS.find(x=>x.id===c.id);
+}
+async function savedThenPlay(clip){recUI('saved','Saved! This is how it will sound…');if(clip)await playClipObj(clip);setTimeout(()=>{if($('#recOv').dataset.mode==='saved')recUI(null)},900)}
+async function toggleRec(slot){
+  if(recState){stopRec();return}
+  if(CLIPS.filter(c=>c.slot===slot).length>=3){recUI('error','This one already has 3 recordings. Delete one (🗑) to record a new one.');return}
+  micBusy=true;hush();
+  recUI('starting','Starting the microphone… If the iPhone asks to use the microphone, tap Allow.');
+  if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia||!window.MediaRecorder){restoreSession();
+    recUI('error','This phone can’t record inside the game. Use “📁 Use a voice memo” instead: record in the Voice Memos app, tap ••• → Save to Files, then pick it here.');return}
+  try{if(navigator.audioSession)navigator.audioSession.type='play-and-record'}catch(e){}
+  let stream;
+  try{stream=await navigator.mediaDevices.getUserMedia({audio:true})}
+  catch(err){restoreSession();recUI('error',micErrorText(err));return}
+  const mime=['audio/mp4','audio/aac','audio/webm;codecs=opus','audio/webm'].find(m=>MediaRecorder.isTypeSupported&&MediaRecorder.isTypeSupported(m))||'';
+  let rec;
+  try{rec=mime?new MediaRecorder(stream,{mimeType:mime}):new MediaRecorder(stream)}
+  catch(e){try{rec=new MediaRecorder(stream)}catch(e2){stream.getTracks().forEach(tk=>tk.stop());restoreSession();recUI('error',`Recording could not start (${e2.name||e2}).`);return}}
+  const chunks=[];
+  rec.ondataavailable=e=>{if(e.data&&e.data.size)chunks.push(e.data)};
+  rec.onstop=async()=>{stream.getTracks().forEach(tk=>tk.stop());restoreSession();recState=null;
+    try{const type=rec.mimeType||mime||'audio/mp4',data=await new Blob(chunks,{type}).arrayBuffer();
+      if(!data.byteLength)throw new Error('The recording came out empty');
+      const clip=await saveClip(slot,type,data);await savedThenPlay(clip)}
+    catch(err){renderClips();recUI('error',`Could not save the recording (${err.message||err.name||err}). Try again, or use “📁 Use a voice memo”.`)}};
+  try{rec.start()}catch(e){stream.getTracks().forEach(tk=>tk.stop());restoreSession();recUI('error',`Recording could not start (${e.name||e}).`);return}
+  recState={slot,rec,timer:setTimeout(stopRec,5000)};renderClips();
+  recUI('recording','Recording — say it now!');
+}
+function stopRec(){if(!recState)return;clearTimeout(recState.timer);recUI('starting','Saving…');try{recState.rec.stop()}catch(e){recState=null;restoreSession();renderClips();recUI(null)}}
+// Backup: pick a recording made in Voice Memos (or any audio file)
+async function useFile(slot,file){
+  if(!file)return;recUI('starting','Loading the recording…');
+  try{if(file.size>8e6)throw new Error('too big');const data=await file.arrayBuffer();audioInit();
+    if(AC)await decodeAudio(data);
+    const clip=await saveClip(slot,file.type||'audio/mp4',data);await savedThenPlay(clip)}
+  catch(err){recUI('error',err&&err.message==='full'?'This one already has 3 recordings. Delete one (🗑) first.':'That file could not be used. Pick a short audio recording, like one from Voice Memos (under 8 MB).')}
+}
+document.querySelectorAll('.recbtn').forEach(b=>b.onclick=e=>{e.preventDefault();toggleRec(b.closest('.recblock').dataset.slot)});
+document.querySelectorAll('.recfile input').forEach(inp=>inp.onchange=()=>{useFile(inp.closest('.recblock').dataset.slot,inp.files&&inp.files[0]);inp.value=''});
+$('#recStop').onclick=()=>stopRec();$('#recClose').onclick=()=>recUI(null);
 
 /* ---------- grown-up: progress page ---------- */
 function renderProgress(){
@@ -1360,7 +1433,7 @@ onTap($('#garageBack'),()=>{SFX.tap();goMap()});
 onTap($('#changeBuddy'),()=>{SFX.tap();goBuddy()});
 document.addEventListener('visibilitychange',()=>{if(document.hidden){hush();engineOff();touches.clear();save()}else if(state==='race'&&!paused){audioInit();engineOn()}});
 
-const VERSION='v7';$('#verLbl').textContent=VERSION;$('#verSet').textContent='· '+VERSION;
+const VERSION='v8';$('#verLbl').textContent=VERSION;$('#verSet').textContent='· '+VERSION;
 applyLang();resize();setTheme(THEMES[0],false);show('title');requestAnimationFrame(frame);
 loadClips();
 if(restActive()){goRest()}
