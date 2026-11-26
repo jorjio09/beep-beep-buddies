@@ -151,9 +151,17 @@ body.racing #pcorner .gearIco{opacity:0}
 .lp{border:none;font:700 15px system-ui,sans-serif;padding:8px 14px;border-radius:99px;background:transparent;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.35)}
 .lp.on{background:#fff;color:#2b6fd6;text-shadow:none;box-shadow:0 2px 0 rgba(0,0,0,.15)}
 .ptip{font-size:13.5px;color:#555;line-height:1.4;background:#f4f7ff;border-radius:10px;padding:10px 12px;margin-top:14px}
-/* grown-up menu sections */
-.pcard details{border-top:1px solid #eee;padding:2px 0}
-.pcard summary{font-size:18px;font-weight:700;padding:12px 0;cursor:pointer}
+/* grown-up menu sections: all open, with jump buttons pinned at the top */
+.pcard{position:relative;padding-top:0!important;-webkit-overflow-scrolling:touch}
+.pnav{position:sticky;top:0;z-index:2;background:#fff;padding:12px 0 8px;margin:0 -2px;border-bottom:1px solid #eee}
+.pnavtop{display:flex;align-items:center;gap:8px}
+.pnavtop h2{flex:1;margin:0!important}
+.pxbtn{border:none;background:#2b8ce0;color:#fff;font:700 16px system-ui,sans-serif;padding:9px 14px;border-radius:12px}
+.pjump{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.pjump button{border:1px solid #d6def5;background:#f4f7ff;color:#223;font:600 14px system-ui,sans-serif;padding:7px 10px;border-radius:99px}
+.psec{border-top:1px solid #eee;padding:4px 0 10px;scroll-margin-top:110px}
+.psec:first-of-type{border-top:none}
+.ph{font-size:18px!important;font-weight:700;color:#222!important;text-transform:none!important;letter-spacing:0!important;margin:12px 0 4px!important}
 .frow{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:4px 0}
 .frow>span{font-size:15px;font-weight:600;min-width:96px}
 .pcard input[type=text]{width:auto;height:auto;flex:1;min-width:140px;font-size:17px;padding:9px 10px;border:1px solid #ccc;border-radius:10px;-webkit-user-select:text;user-select:text}
@@ -308,21 +316,27 @@ body.racing #pcorner .gearIco{opacity:0}
 
 <div id="parent">
   <div class="pcard">
-    <h2>Grown-up settings <span id="verSet" style="font-size:13px;color:#999;font-weight:500"></span></h2>
-    <details open><summary>👦 Child &amp; language</summary>
+    <div class="pnav">
+      <div class="pnavtop"><h2>Grown-up settings <span id="verSet" style="font-size:13px;color:#999;font-weight:500"></span></h2><button id="pX" class="pxbtn">Done ✓</button></div>
+      <div class="pjump">
+        <button data-go="sec-child">👦 Name</button><button data-go="sec-voice">❤️ Voice</button><button data-go="sec-time">⏰ Time</button>
+        <button data-go="sec-progress">📊 Progress</button><button data-go="sec-learn">📚 Learning</button><button data-go="sec-sound">🔊 Sound</button>
+      </div>
+    </div>
+    <section class="psec" id="sec-child"><h3 class="ph">👦 Child &amp; language</h3>
       <div class="frow"><span>Child's name</span><input type="text" id="kidName" placeholder="e.g. Jorgito" maxlength="20" autocomplete="off" autocapitalize="words"></div>
       <div class="frow"><span>Say name in</span><label><input type="radio" name="nameLang" value="es"> Spanish</label><label><input type="radio" name="nameLang" value="en"> English</label><button id="testName" class="tbtn">▶ Test</button></div>
       <h3>Game language / Idioma</h3>
       <label><input type="radio" name="lang" value="en"> 🇺🇸 English</label>
       <label><input type="radio" name="lang" value="es"> 🇵🇷 Español</label>
-    </details>
-    <details><summary>❤️ Family voice</summary>
+    </section>
+    <section class="psec" id="sec-voice"><h3 class="ph">❤️ Family voice</h3>
       <p class="pnote">Record your own voice! The game plays it when he gets a question right, or to cheer him on when he misses one. Up to 3 recordings each, about 5 seconds max. <b>Recordings stay on this phone only</b>, so record on each phone.</p>
       <div class="recblock" data-slot="right"><b>When the answer is right</b> <i>e.g. “¡Eso es!”</i><div class="cliplist"></div><button class="recbtn">● Record</button></div>
       <div class="recblock" data-slot="wrong"><b>When the answer is wrong</b> <i>e.g. “¡Sigue, que tú puedes!”</i><div class="cliplist"></div><button class="recbtn">● Record</button></div>
       <div id="recMsg" class="pnote"></div>
-    </details>
-    <details><summary>⏰ Play time</summary>
+    </section>
+    <section class="psec" id="sec-time"><h3 class="ph">⏰ Play time</h3>
       <div class="frow"><span>Rest after</span><select id="limitSel" class="wide">
         <option value="off">Off (no limit)</option><option value="r2">2 races</option><option value="r3">3 races</option><option value="r5">5 races</option>
         <option value="m10">10 minutes</option><option value="m15">15 minutes</option><option value="m20">20 minutes</option><option value="m30">30 minutes</option></select></div>
@@ -330,9 +344,9 @@ body.racing #pcorner .gearIco{opacity:0}
         <option value="30">30 minutes</option><option value="60">1 hour</option><option value="120">2 hours</option><option value="-1">Until a grown-up unlocks</option></select></div>
       <p id="limitInfo" class="pnote"></p>
       <button id="pUnlock" class="tbtn">Start a new play session now</button>
-    </details>
-    <details><summary>📊 Progress</summary><div id="progress"></div></details>
-    <details><summary>📚 Learning &amp; games</summary>
+    </section>
+    <section class="psec" id="sec-progress"><h3 class="ph">📊 Progress</h3><div id="progress"></div></section>
+    <section class="psec" id="sec-learn"><h3 class="ph">📚 Learning &amp; games</h3>
       <h3>Learning topics</h3>
       <label><input type="checkbox" data-sub="math"> Math (+ and −)</label>
       <label><input type="checkbox" data-sub="count"> Counting</label>
@@ -352,8 +366,8 @@ body.racing #pcorner .gearIco{opacity:0}
       <label><input type="radio" name="per" value="3"> 3</label>
       <h3>Mini-games</h3>
       <label><input type="checkbox" id="setMini"> Car wash, gas station &amp; parking (every other race)</label>
-    </details>
-    <details><summary>🔊 Sound &amp; voice</summary>
+    </section>
+    <section class="psec" id="sec-sound"><h3 class="ph">🔊 Sound &amp; voice</h3>
     <h3>Sound</h3>
     <label><input type="checkbox" id="setSound"> Sound effects</label>
     <label><input type="checkbox" id="setVoice"> Talking voice</label>
@@ -366,7 +380,7 @@ body.racing #pcorner .gearIco{opacity:0}
     <div class="vrow"><span>Español</span><select id="voiceEs"></select><button id="testEs" class="tbtn">▶ Test</button></div>
     <div id="voiceMsg" style="color:#c00;font-size:14px;line-height:1.35"></div>
     <div class="ptip"><b>Want a more natural voice?</b> On the iPhone go to Settings → Accessibility → Spoken Content (called <i>Read &amp; Speak</i> on some newer iPhones) → Voices. Under <b>English</b> download <b>Ava (Premium)</b> or <b>Samantha (Enhanced)</b>. Under <b>Spanish</b> download <b>Paulina (Enhanced)</b> or <b>Mónica (Enhanced)</b>. Then close and reopen the game and pick them above. The best voices are listed first.</div>
-    </details>
+    </section>
     <div class="pbtns">
       <button id="pMap">Back to map</button>
       <button id="pReset" class="danger">Reset progress</button>
@@ -1274,7 +1288,7 @@ function openParent(){
   $('#kidName').value=S.settings.kidName||'';
   document.querySelectorAll('[name=nameLang]').forEach(r=>r.checked=r.value===(S.settings.nameLang||'es'));
   $('#limitSel').value=S.settings.limit||'off';$('#restSel').value=String(S.settings.restMin||30);$('#setMini').checked=!!S.settings.minigames;
-  renderProgress();updateLimitInfo();$('#recMsg').textContent='';loadClips().then(renderClips);
+  renderProgress();updateLimitInfo();$('#recMsg').textContent='';loadClips().then(renderClips);$('.pcard').scrollTop=0;
   $('#setSound').checked=S.settings.sound;$('#setVoice').checked=S.settings.voice;
   document.querySelectorAll('[name=lang]').forEach(r=>r.checked=r.value===L());
   document.querySelectorAll('[name=speed]').forEach(r=>r.checked=r.value===S.settings.speed);
@@ -1324,7 +1338,11 @@ $('#testEs').onclick=()=>{audioInit();testVoice('es')};
 $('#voiceEn').onchange=$('#voiceEs').onchange=e=>{badVoices.delete(e.target.value);saveBad();readParent()};
 document.querySelectorAll('[name=speed],[name=lang]').forEach(r=>r.onchange=()=>readParent());
 function closeParent(){if(recState)stopRec();readParent();$('#parent').classList.remove('on');paused=false;if(state==='race')engineOn()}
-$('#pClose').onclick=closeParent;
+$('#pClose').onclick=closeParent;$('#pX').onclick=closeParent;
+// jump buttons: scroll the settings card straight to a section
+document.querySelectorAll('.pjump [data-go]').forEach(b=>b.onclick=()=>{
+  const card=$('.pcard'),sec=document.getElementById(b.dataset.go),nav=$('.pnav');
+  card.scrollTo({top:sec.offsetTop-nav.offsetHeight-4,behavior:'smooth'})});
 $('#pMap').onclick=()=>{closeParent();if(S.buddy==null)goBuddy();else goMap()};
 $('#pReset').onclick=()=>{if(confirm('Reset all progress, stickers, unlocked cars and the progress report? (Recordings and settings are kept.)')){const keep=S.settings;S=clone(DEFAULTS);S.settings=keep;newSession();save();closeParent();goTitle()}};
 $('#pUnlock').onclick=()=>{S.restUntil=0;newSession();save();updateLimitInfo();closeParent();if(S.buddy==null)goBuddy();else goMap()};
@@ -1342,7 +1360,7 @@ onTap($('#garageBack'),()=>{SFX.tap();goMap()});
 onTap($('#changeBuddy'),()=>{SFX.tap();goBuddy()});
 document.addEventListener('visibilitychange',()=>{if(document.hidden){hush();engineOff();touches.clear();save()}else if(state==='race'&&!paused){audioInit();engineOn()}});
 
-const VERSION='v6';$('#verLbl').textContent=VERSION;$('#verSet').textContent='· '+VERSION;
+const VERSION='v7';$('#verLbl').textContent=VERSION;$('#verSet').textContent='· '+VERSION;
 applyLang();resize();setTheme(THEMES[0],false);show('title');requestAnimationFrame(frame);
 loadClips();
 if(restActive()){goRest()}
