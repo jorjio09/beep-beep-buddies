@@ -9,11 +9,14 @@
 <meta name="apple-mobile-web-app-title" content="Beep Beep">
 <meta name="theme-color" content="#6fc8ff">
 <title>Beep Beep Buddies</title>
-<link rel="apple-touch-icon" id="touchIcon" href="">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="manifest" href="manifest.webmanifest">
 <style>
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
 html,body{margin:0;height:100%;overflow:hidden;background:#6fc8ff;font-family:ui-rounded,"SF Pro Rounded","Arial Rounded MT Bold","Avenir Next",system-ui,sans-serif;touch-action:none;overscroll-behavior:none;position:fixed;inset:0}
-canvas{position:fixed;inset:0;width:100%;height:100%;display:block}
+#game,#fx{position:fixed;inset:0;width:100%;height:100%;display:block}
+canvas{display:block}
 #fx{pointer-events:none;z-index:60}
 .screen{position:fixed;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;z-index:10;
  padding:max(10px,env(safe-area-inset-top)) max(14px,env(safe-area-inset-right)) max(10px,env(safe-area-inset-bottom)) max(14px,env(safe-area-inset-left))}
@@ -128,6 +131,73 @@ canvas{position:fixed;inset:0;width:100%;height:100%;display:block}
 .lp{border:none;font:700 15px system-ui,sans-serif;padding:8px 14px;border-radius:99px;background:transparent;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.35)}
 .lp.on{background:#fff;color:#2b6fd6;text-shadow:none;box-shadow:0 2px 0 rgba(0,0,0,.15)}
 .ptip{font-size:13.5px;color:#555;line-height:1.4;background:#f4f7ff;border-radius:10px;padding:10px 12px;margin-top:14px}
+/* grown-up menu sections */
+.pcard details{border-top:1px solid #eee;padding:2px 0}
+.pcard summary{font-size:18px;font-weight:700;padding:12px 0;cursor:pointer}
+.frow{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:4px 0}
+.frow>span{font-size:15px;font-weight:600;min-width:96px}
+.pcard input[type=text]{width:auto;height:auto;flex:1;min-width:140px;font-size:17px;padding:9px 10px;border:1px solid #ccc;border-radius:10px;-webkit-user-select:text;user-select:text}
+.pcard select.wide{font-size:16px;padding:9px;border-radius:10px;border:1px solid #ccc;background:#fff;min-width:210px}
+.pnote{font-size:14px;color:#555;line-height:1.4;margin:6px 0}
+.recblock{background:#fff4f7;border-radius:12px;padding:10px 12px;margin:8px 0;font-size:15px}
+.recblock i{color:#888;font-size:14px}
+.cliplist{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+.clip{display:inline-flex;align-items:center;gap:4px;background:#fff;border:1px solid #f0c8d2;border-radius:99px;padding:4px 6px 4px 10px;font-size:14px}
+.clip button{border:none;background:#f3f3f3;border-radius:99px;padding:6px 10px;font-size:14px}
+.recbtn{padding:10px 14px;font-size:15px;font-weight:700;border-radius:10px;border:none;background:#ff4f7a;color:#fff}
+.recbtn.rec{background:#c00;animation:pulse 1s infinite}
+.recbtn:disabled{background:#ccc}
+.prow{display:flex;align-items:center;gap:8px;font-size:14px;padding:3px 0}
+.prow span:first-child{width:118px}
+.prow span:last-child{width:86px;text-align:right;color:#666}
+.pbar{height:12px;background:#eee;border-radius:99px;overflow:hidden;flex:1}
+.pbar i{display:block;height:100%;background:linear-gradient(90deg,#55e597,#1fb35e)}
+.chips{display:flex;flex-wrap:wrap;gap:5px;margin:4px 0 8px}
+.chips span{background:#eafbea;border-radius:99px;padding:3px 9px;font-size:13px}
+.chips.warn span{background:#fff1d6}
+/* number-only answers, shapes, patterns */
+.ans .num.big{font-size:min(19vmin,124px)}
+.ans .shp{width:min(20vmin,130px);height:min(20vmin,130px)}
+.it.lit{transform:scale(1.25)}
+.it.qbox .g{display:inline-block;border:.06em dashed #c9b25a;border-radius:.2em;padding:0 .08em}
+/* rest */
+.restpic{font-size:min(26vmin,160px);line-height:1;position:relative;margin-top:1vmin}
+#restBuddy{position:absolute;right:-14%;bottom:-2%;font-size:42%}
+.restsub{font:600 min(4vmin,18px) system-ui;color:#777;margin-top:1vmin;text-align:center}
+/* garage & buddy locks */
+.ggrid{flex:1;overflow:auto;display:grid;grid-template-columns:repeat(auto-fill,minmax(min(29vmin,170px),1fr));gap:2vmin;padding:2vmin;touch-action:pan-y;align-content:start}
+.gcard{border-radius:22px;background:#eef6ff;border:5px solid #fff;box-shadow:0 6px 0 #c9daf0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:1vmin;position:relative}
+.gcard canvas{width:100%;height:auto}
+.gcard.sel{border-color:#22c065;background:#e3ffe9;box-shadow:0 6px 0 #1fa85a}
+.gcard.locked canvas{filter:grayscale(1);opacity:.35}
+.gcard .lock,.card .lock{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;font-size:min(8vmin,44px);line-height:1.1}
+.gcard .lock small,.card .lock small{font:800 min(3.6vmin,18px) system-ui;color:#444;background:rgba(255,255,255,.85);border-radius:99px;padding:2px 8px;margin-top:4px}
+.card{position:relative}
+.card.locked{filter:grayscale(.9);opacity:.6}
+#unlockCan{width:min(52vmin,300px);height:auto}
+/* mini-games */
+.minicard{width:min(97vw,980px);height:min(94vh,640px);background:#fff;border-radius:32px;padding:2vmin;display:flex;flex-direction:column;gap:1.5vmin;animation:popin .4s}
+.minihead{display:flex;align-items:center;gap:2vmin}
+.minititle{font-size:min(7vmin,42px);font-weight:900;color:#4a3aa8}
+#miniArea{flex:1;position:relative;min-height:0;border-radius:24px;overflow:hidden;background:#eaf7ff;touch-action:none}
+#miniArea>canvas{position:absolute;inset:0;width:100%;height:100%}
+.gasgame{position:absolute;inset:0;display:flex;align-items:center;justify-content:space-around;padding:2vmin}
+.gasleft{display:flex;flex-direction:column;align-items:center;gap:1vmin}
+.gasnum{font-size:min(22vmin,130px);font-weight:900;color:#ff6b3b;line-height:1}
+.drops{display:flex;flex-wrap:wrap;justify-content:center;max-width:min(42vmin,260px);gap:1vmin;font-size:min(8vmin,44px)}
+.drops span{opacity:.2;filter:grayscale(1);transition:.25s}
+.drops span.on{opacity:1;filter:none;transform:scale(1.2)}
+.pump{width:min(36vmin,210px);height:min(36vmin,210px);border-radius:50%;font-size:min(20vmin,112px);display:flex;align-items:center;justify-content:center}
+.gauge{width:min(11vmin,64px);height:80%;border:5px solid #4a3aa8;border-radius:20px;position:relative;overflow:hidden;background:#fff}
+.gauge i{position:absolute;left:0;right:0;bottom:0;height:0;background:linear-gradient(#ffd93b,#ff8a1f);transition:height .35s}
+.park{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:space-between;padding:2vmin;background:#8f949c}
+.spots,.pcars{display:flex;justify-content:space-around;gap:2vmin}
+.spot{width:29%;height:min(27vmin,165px);border:6px dashed;border-radius:18px;display:flex;align-items:center;justify-content:center;font:900 min(11vmin,64px) system-ui;color:rgba(255,255,255,.8)}
+.spot.full{border-style:solid}
+.pcar{width:27%;height:min(23vmin,140px);touch-action:none;position:relative}
+.pcar canvas{width:100%;height:100%;object-fit:contain}
+.pcar.drag{z-index:5}
+.pcar.parked{pointer-events:none;width:94%;height:94%}
 @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
 @keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-14%)}}
 @keyframes drive{0%,100%{transform:translateX(-6vmin)}50%{transform:translateX(6vmin)}}
@@ -156,7 +226,7 @@ canvas{position:fixed;inset:0;width:100%;height:100%;display:block}
 <div id="map" class="screen">
   <div class="htitle" data-t="where"></div>
   <div id="levels" class="grid6"></div>
-  <div class="maptools"><button id="bookBtn" class="btn round purple">📒</button><button id="changeBuddy" class="btn round orange">🐶</button></div>
+  <div class="maptools"><button id="bookBtn" class="btn round purple">📒</button><button id="garageBtn" class="btn round green">🚘</button><button id="changeBuddy" class="btn round orange">🐶</button></div>
 </div>
 
 <div id="hud" class="screen hud">
@@ -183,12 +253,76 @@ canvas{position:fixed;inset:0;width:100%;height:100%;display:block}
   </div>
 </div>
 
+<div id="garage" class="screen dim">
+  <div class="bookcard">
+    <div class="bookhead"><button id="garageBack" class="btn round orange">⬅</button><div class="htitle dark" data-t="garage"></div></div>
+    <div id="garageGrid" class="ggrid"></div>
+  </div>
+</div>
+
+<div id="unlock" class="screen dim">
+  <div class="stkcard"><div class="htitle dark" id="unlockTitle"></div><canvas id="unlockCan" width="600" height="440"></canvas><button id="unlockNext" class="btn green bigbtn">▶</button></div>
+</div>
+
+<div id="rest" class="screen dim">
+  <div class="stkcard"><div class="htitle dark" data-t="restTitle"></div><div class="restpic">🏠<span id="restBuddy">😴</span></div><div id="restSub" class="restsub"></div></div>
+</div>
+
+<div id="mini" class="screen dim">
+  <div class="minicard">
+    <div class="minihead"><button id="miniSpeak" class="btn round blue">🔊</button><div id="miniTitle" class="minititle"></div></div>
+    <div id="miniArea"></div>
+  </div>
+</div>
+
 <div id="parent">
   <div class="pcard">
     <h2>Grown-up settings</h2>
-    <h3>Game language / Idioma</h3>
-    <label><input type="radio" name="lang" value="en"> 🇺🇸 English</label>
-    <label><input type="radio" name="lang" value="es"> 🇲🇽 Español</label>
+    <details open><summary>👦 Child &amp; language</summary>
+      <div class="frow"><span>Child's name</span><input type="text" id="kidName" placeholder="e.g. Jorgito" maxlength="20" autocomplete="off" autocapitalize="words"></div>
+      <div class="frow"><span>Say name in</span><label><input type="radio" name="nameLang" value="es"> Spanish</label><label><input type="radio" name="nameLang" value="en"> English</label><button id="testName" class="tbtn">▶ Test</button></div>
+      <h3>Game language / Idioma</h3>
+      <label><input type="radio" name="lang" value="en"> 🇺🇸 English</label>
+      <label><input type="radio" name="lang" value="es"> 🇲🇽 Español</label>
+    </details>
+    <details><summary>❤️ Family voice</summary>
+      <p class="pnote">Record your own voice! The game plays it when he gets a question right, or to cheer him on when he misses one. Up to 3 recordings each, about 5 seconds max. <b>Recordings stay on this phone only</b>, so record on each phone.</p>
+      <div class="recblock" data-slot="right"><b>When the answer is right</b> <i>e.g. “¡Eso es!”</i><div class="cliplist"></div><button class="recbtn">● Record</button></div>
+      <div class="recblock" data-slot="wrong"><b>When the answer is wrong</b> <i>e.g. “¡Sigue, que tú puedes!”</i><div class="cliplist"></div><button class="recbtn">● Record</button></div>
+      <div id="recMsg" class="pnote"></div>
+    </details>
+    <details><summary>⏰ Play time</summary>
+      <div class="frow"><span>Rest after</span><select id="limitSel" class="wide">
+        <option value="off">Off (no limit)</option><option value="r2">2 races</option><option value="r3">3 races</option><option value="r5">5 races</option>
+        <option value="m10">10 minutes</option><option value="m15">15 minutes</option><option value="m20">20 minutes</option><option value="m30">30 minutes</option></select></div>
+      <div class="frow"><span>Rest for</span><select id="restSel" class="wide">
+        <option value="30">30 minutes</option><option value="60">1 hour</option><option value="120">2 hours</option><option value="-1">Until a grown-up unlocks</option></select></div>
+      <p id="limitInfo" class="pnote"></p>
+      <button id="pUnlock" class="tbtn">Start a new play session now</button>
+    </details>
+    <details><summary>📊 Progress</summary><div id="progress"></div></details>
+    <details><summary>📚 Learning &amp; games</summary>
+      <h3>Learning topics</h3>
+      <label><input type="checkbox" data-sub="math"> Math (+ and −)</label>
+      <label><input type="checkbox" data-sub="count"> Counting</label>
+      <label><input type="checkbox" data-sub="numbers"> Numbers (find the 4)</label>
+      <label><input type="checkbox" data-sub="shapes"> Shapes &amp; sizes</label>
+      <label><input type="checkbox" data-sub="patterns"> Patterns</label>
+      <label><input type="checkbox" data-sub="english"> English words &amp; colors</label>
+      <label><input type="checkbox" data-sub="spanish"> Spanish words &amp; colors</label>
+      <label><input type="checkbox" data-sub="letters"> Letters &amp; sounds</label>
+      <h3>Math level</h3>
+      <label><input type="radio" name="math" value="auto"> Auto (adjusts to him)</label>
+      <label><input type="radio" name="math" value="easy"> Easy (up to 5)</label>
+      <label><input type="radio" name="math" value="medium"> Medium (up to 10)</label>
+      <h3>Questions after each race</h3>
+      <label><input type="radio" name="per" value="1"> 1</label>
+      <label><input type="radio" name="per" value="2"> 2</label>
+      <label><input type="radio" name="per" value="3"> 3</label>
+      <h3>Mini-games</h3>
+      <label><input type="checkbox" id="setMini"> Car wash, gas station &amp; parking (every other race)</label>
+    </details>
+    <details><summary>🔊 Sound &amp; voice</summary>
     <h3>Sound</h3>
     <label><input type="checkbox" id="setSound"> Sound effects</label>
     <label><input type="checkbox" id="setVoice"> Talking voice</label>
@@ -201,19 +335,7 @@ canvas{position:fixed;inset:0;width:100%;height:100%;display:block}
     <div class="vrow"><span>Español</span><select id="voiceEs"></select><button id="testEs" class="tbtn">▶ Test</button></div>
     <div id="voiceMsg" style="color:#c00;font-size:14px;line-height:1.35"></div>
     <div class="ptip"><b>Want a more natural voice?</b> On the iPhone go to Settings → Accessibility → Spoken Content (called <i>Read &amp; Speak</i> on some newer iPhones) → Voices. Under <b>English</b> download <b>Ava (Premium)</b> or <b>Samantha (Enhanced)</b>. Under <b>Spanish</b> download <b>Paulina (Enhanced)</b> or <b>Mónica (Enhanced)</b>. Then close and reopen the game and pick them above. The best voices are listed first.</div>
-    <h3>Learning topics</h3>
-    <label><input type="checkbox" data-sub="math"> Math (+ and −)</label>
-    <label><input type="checkbox" data-sub="count"> Counting</label>
-    <label><input type="checkbox" data-sub="english"> English words &amp; colors</label>
-    <label><input type="checkbox" data-sub="spanish"> Spanish words &amp; colors</label>
-    <label><input type="checkbox" data-sub="letters"> Letters (ABC)</label>
-    <h3>Math level</h3>
-    <label><input type="radio" name="math" value="easy"> Easy (up to 5)</label>
-    <label><input type="radio" name="math" value="medium"> Medium (up to 10)</label>
-    <h3>Questions after each level</h3>
-    <label><input type="radio" name="per" value="1"> 1</label>
-    <label><input type="radio" name="per" value="2"> 2</label>
-    <label><input type="radio" name="per" value="3"> 3</label>
+    </details>
     <div class="pbtns">
       <button id="pMap">Back to map</button>
       <button id="pReset" class="danger">Reset progress</button>
@@ -252,6 +374,33 @@ const T={
 };
 const NUMS={en:['zero','one','two','three','four','five','six','seven','eight','nine','ten'],es:['cero','uno','dos','tres','cuatro','cinco','seis','siete','ocho','nueve','diez']};
 const LETTERS_ES={A:['🐝','abeja'],B:['⛵','barco'],C:['🏠','casa'],D:['🎲','dado'],E:['🐘','elefante'],F:['🌸','flor'],G:['🐱','gato'],H:['🍦','helado'],I:['🏝️','isla'],J:['🦒','jirafa'],K:['🐨','koala'],L:['🌙','luna'],M:['🍎','manzana'],N:['☁️','nube'],O:['🐻','oso'],P:['🐶','perro'],Q:['🧀','queso'],R:['🐭','ratón'],S:['☀️','sol'],T:['🐢','tortuga'],U:['🍇','uvas'],V:['🐮','vaca'],Y:['🪀','yoyo'],Z:['👟','zapato']};
+Object.assign(T.en,{garage:'My Cars',restTitle:'Time to rest!',restBye:'See you later!',restIn:m=>`Come back in ${m} min`,restLocked:'A grown-up can unlock the game',
+  unlockCar:'New car!',unlockBuddy:'New buddy!',needStk:'Get more stickers to unlock it!',
+  wash:'Car wash!',washSay:[['Oh no, the car is muddy!'],['Rub it with your finger to wash it!']],washHint:[['Rub the mud with your finger!']],washDone:[['So clean!'],['It sparkles!']],
+  gas:'Gas station!',gasSay:n=>[['The car needs gas!'],[n===1?'Tap the pump one time!':`Tap the pump ${n} times!`]],gasDone:n=>[['Full!'],[`You counted to ${n}!`]],
+  park:'Parking time!',parkSay:[['Park each car'],['on its own color!']],parkTry:c=>[[`Find the ${c} spot!`]],parkDone:[['All parked!'],['Great job!']]});
+Object.assign(T.en.tags,{numbers:'Numbers',shapes:'Shapes',patterns:'Patterns'});
+Object.assign(T.es,{garage:'Mis carros',restTitle:'¡Hora de descansar!',restBye:'¡Hasta luego!',restIn:m=>`Vuelve en ${m} min`,restLocked:'Un adulto puede desbloquear el juego',
+  unlockCar:'¡Carro nuevo!',unlockBuddy:'¡Amigo nuevo!',needStk:'¡Junta más estampas para ganarlo!',
+  wash:'¡Lavado de carro!',washSay:[['¡Ay no, el carro está lleno de lodo!'],['¡Tállalo con tu dedo para lavarlo!']],washHint:[['¡Talla el lodo con tu dedo!']],washDone:[['¡Qué limpio!'],['¡Brilla!']],
+  gas:'¡Gasolinera!',gasSay:n=>[['¡El carro necesita gasolina!'],[n===1?'¡Toca la bomba una vez!':`¡Toca la bomba ${n} veces!`]],gasDone:n=>[['¡Lleno!'],[`¡Contaste hasta ${n}!`]],
+  park:'¡A estacionar!',parkSay:[['¡Estaciona cada carro'],['en su color!']],parkTry:c=>[[`¡Busca el lugar ${c}!`]],parkDone:[['¡Todos estacionados!'],['¡Muy bien!']]});
+Object.assign(T.es.tags,{numbers:'Números',shapes:'Figuras',patterns:'Patrones'});
+// Unlocked by collecting stickers
+const EXTRA_BUDDIES=[{e:'🦄',c:'#b57bff',name:'Unicorn',es:'Unicornio',need:3},{e:'🐼',c:'#5b6b7f',name:'Panda',es:'Panda',need:8},{e:'🐯',c:'#ff8a1f',name:'Tiger',es:'Tigre',need:13},{e:'🐵',c:'#b07a3c',name:'Monkey',es:'Changuito',need:18}];
+const ALL_BUDDIES=[...BUDDIES,...EXTRA_BUDDIES];
+const CARS=[{id:'race',en:'Race car',es:'Carro de carreras',need:0},{id:'fire',en:'Fire truck',es:'Camión de bomberos',need:5},{id:'police',en:'Police car',es:'Patrulla',need:10},
+  {id:'monster',en:'Monster truck',es:'Camión monstruo',need:15},{id:'taxi',en:'Taxi',es:'Taxi',need:20},{id:'rocket',en:'Rocket car',es:'Carro cohete',need:25}];
+function carColor(style,c){return style==='fire'?'#e53935':style==='police'?'#22304d':style==='taxi'?'#ffc400':c}
+const SHAPES=[{id:'circle',en:'circle',es:'el círculo',svg:'<circle cx="50" cy="50" r="42"/>'},{id:'square',en:'square',es:'el cuadrado',svg:'<rect x="10" y="10" width="80" height="80" rx="6"/>'},
+  {id:'triangle',en:'triangle',es:'el triángulo',svg:'<polygon points="50,6 95,90 5,90"/>'},{id:'star',en:'star',es:'la estrella',svg:'<polygon points="50,4 61,37 96,37 68,58 78,92 50,71 22,92 32,58 4,37 39,37"/>'},
+  {id:'heart',en:'heart',es:'el corazón',svg:'<path d="M50 90 C20 68 4 52 4 32 C4 16 16 6 29 6 C39 6 46 12 50 20 C54 12 61 6 71 6 C84 6 96 16 96 32 C96 52 80 68 50 90Z"/>'}];
+const SHAPE_COLORS=['#ff4f7a','#2b8ce0','#22c065','#ffb020','#9b5cff'];
+const PAT_SETS=[[['🔴','red','rojo'],['🔵','blue','azul'],['🟡','yellow','amarillo'],['🟢','green','verde']],[['🐶','dog','perro'],['🐱','cat','gato'],['🐰','bunny','conejo']],
+  [['⭐','star','estrella'],['🌙','moon','luna'],['☀️','sun','sol']],[['🍎','apple','manzana'],['🍌','banana','plátano'],['🍇','grapes','uvas']]];
+// Letter sounds: English stop-consonant sounds read well by the voice; Spanish uses the first syllable
+const PHON_EN={B:'buh',C:'kuh',D:'duh',G:'guh',H:'huh',J:'juh',K:'kuh',P:'puh',T:'tuh',W:'wuh',Y:'yuh',L:'luh',R:'ruh',V:'vuh'};
+const SYL_ES={A:'a',B:'bar',C:'ca',D:'da',E:'e',F:'flor',G:'ga',H:'he',I:'is',J:'ji',K:'ko',L:'lu',M:'man',N:'nu',O:'o',P:'pe',Q:'que',R:'ra',S:'sol',T:'tor',U:'u',V:'va',Y:'yo',Z:'za'};
 const THEMES=[
  {name:'Farm',icon:'🚜',sky:['#5fc0ff','#c9efff'],g:['#7ccf5a','#6fc24e'],road:['#8b8f98','#848891'],rumble:['#ffffff','#ff5b4a'],side:['🌳','🌻','🐄','🐑','🏡','🌳','🌾','🐓'],treat:'🍎',bump:['🎃','📦'],bg:'hills',h1:'#5fb546',h2:'#9ade72'},
  {name:'Beach',icon:'🏖️',sky:['#3db4ff','#bdf0ff'],g:['#f6dc93','#efd17d'],road:['#9a9aa3','#92929b'],rumble:['#ffffff','#2fb8ff'],side:['🌴','⛱️','🦀','🐚','🌴','🏄'],treat:'🍉',bump:['🏐','📦'],bg:'ocean'},
@@ -269,10 +418,36 @@ const LETTERS={A:['🍎','apple'],B:['⚽','ball'],C:['🐱','cat'],D:['🐶','d
 
 /* ---------- save ---------- */
 const SAVE_KEY='beepbeep_v1';
-const DEFAULTS={buddy:null,unlocked:1,completed:[],stickers:[],totalStars:0,levelsDone:0,settings:{lang:'en',speed:'slow',voiceName:{en:'',es:''},sound:true,voice:true,math:'easy',perLevel:1,subjects:{math:true,count:true,english:true,spanish:true,letters:true}}};
+const DEFAULTS={v:2,buddy:null,carStyle:'race',unlocked:1,completed:[],stickers:[],totalStars:0,levelsDone:0,miniIdx:0,
+  stats:{topics:{},items:{},days:{}},adapt:{level:5,recent:[]},play:{races:0,ms:0,lastActive:0},restUntil:0,
+  settings:{lang:'en',speed:'slow',voiceName:{en:'',es:''},sound:true,voice:true,math:'auto',perLevel:1,kidName:'',nameLang:'es',limit:'off',restMin:30,minigames:true,
+    subjects:{math:true,count:true,numbers:true,shapes:true,patterns:true,english:true,spanish:true,letters:true}}};
 const clone=o=>JSON.parse(JSON.stringify(o));
-function load(){try{const d=JSON.parse(localStorage.getItem(SAVE_KEY));if(d){const m=Object.assign(clone(DEFAULTS),d);const ds=d.settings||{};m.settings=Object.assign(clone(DEFAULTS.settings),ds);m.settings.subjects=Object.assign(clone(DEFAULTS.settings.subjects),ds.subjects||{});m.settings.voiceName=Object.assign(clone(DEFAULTS.settings.voiceName),ds.voiceName||{});return m}}catch(e){}return clone(DEFAULTS)}
+function load(){try{const d=JSON.parse(localStorage.getItem(SAVE_KEY));if(d){const m=Object.assign(clone(DEFAULTS),d);const ds=d.settings||{};m.settings=Object.assign(clone(DEFAULTS.settings),ds);m.settings.subjects=Object.assign(clone(DEFAULTS.settings.subjects),ds.subjects||{});m.settings.voiceName=Object.assign(clone(DEFAULTS.settings.voiceName),ds.voiceName||{});
+  m.stats=Object.assign(clone(DEFAULTS.stats),d.stats||{});m.adapt=Object.assign(clone(DEFAULTS.adapt),d.adapt||{});m.play=Object.assign(clone(DEFAULTS.play),d.play||{});
+  if(d.v!==2){m.v=2;if(m.settings.math==='easy')m.settings.math='auto'} // older saves: switch to the new automatic math level
+  return m}}catch(e){}return clone(DEFAULTS)}
 let S=load();
+// ---- child's name ----
+const nm=()=>(S.settings.kidName||'').trim();
+// "¡Sí, Jorgito!" — the name is said with the voice of the language chosen for it
+function nameJoin(lead,lang=L()){const n=nm();if(!n)return [[lead+'!',lang]];const nl=S.settings.nameLang||'es';return nl===lang?[[`${lead}, ${n}!`,lang]]:[[lead+',',lang],[n+'!',nl]]}
+// ---- play-time limit ----
+function newSession(){S.play={races:0,ms:0,lastActive:Date.now()}}
+if(Date.now()-(S.play.lastActive||0)>60*60000)newSession(); // more than an hour since last play = new session
+function limitHit(){const l=S.settings.limit;if(!l||l==='off')return false;if(l[0]==='r')return S.play.races>=+l.slice(1);return S.play.ms>=+l.slice(1)*60000}
+function restActive(){if(!S.restUntil)return false;if(S.restUntil===-1||Date.now()<S.restUntil)return true;S.restUntil=0;newSession();save();return false}
+// ---- progress & automatic difficulty ----
+function today(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`}
+function dayRec(){const k=today();return S.stats.days[k]||(S.stats.days[k]={q:0,ok:0,races:0})}
+function recordAnswer(q,first){
+  const st=S.stats,tp=st.topics[q.tag]||(st.topics[q.tag]={n:0,ok:0});tp.n++;if(first)tp.ok++;
+  if(q.key){const it=st.items[q.key]||(st.items[q.key]={n:0,ok:0});it.n++;if(first)it.ok++;it.label=q.label||q.key;it.tag=q.tag;it.last=Date.now()}
+  const d=dayRec();d.q++;if(first)d.ok++;
+  if(q.math){const a=S.adapt;a.recent.push(first?1:0);if(a.recent.length>8)a.recent.shift();const rate=a.recent.reduce((x,y)=>x+y,0)/a.recent.length;
+    if(a.recent.length>=6){if(a.level===5&&rate>=.83){a.level=10;a.recent=[]}else if(a.level===10&&rate<.5){a.level=5;a.recent=[]}}}
+  save();
+}
 const L=()=>S.settings.lang==='es'?'es':'en';
 const tr=k=>T[L()][k];
 function applyLang(){
@@ -480,28 +655,51 @@ function renderRoad(){
       ctx.drawImage(emo(it.e),p1.x+it.off*p1.w-s/2,p1.y-s*.95-bob,s,s)}
   }
 }
-function drawCar(cx,by,w,col,driver,tilt,bounce){
-  const h=w*.6,c=ctx;c.save();c.translate(cx,by);
+// Rear view of the player's car. style: race | fire | police | monster | taxi | rocket
+function drawCar(c,cx,by,w,col,driver,tilt,bounce,style='race'){
+  const h=w*.6,flash=Math.floor(t*5)%2;c.save();c.translate(cx,by);
   c.fillStyle='rgba(0,0,0,.25)';c.beginPath();c.ellipse(0,0,w*.56,h*.12,0,0,Math.PI*2);c.fill();
   c.translate(0,-bounce);c.rotate(tilt*.06);
-  c.fillStyle='#222';rr(c,-w*.5,-h*.42,w*.2,h*.44,w*.05);c.fill();rr(c,w*.3,-h*.42,w*.2,h*.44,w*.05);c.fill();
+  if(style==='monster'){ // giant wheels, body lifted up
+    c.fillStyle='#1b1b1b';rr(c,-w*.62,-h*.95,w*.34,h*.97,w*.09);c.fill();rr(c,w*.28,-h*.95,w*.34,h*.97,w*.09);c.fill();
+    c.fillStyle='#444';for(const sx of [-1,1])for(let k=0;k<5;k++){rr(c,sx*w*.45-w*.15,-h*.9+k*h*.19,w*.3,h*.06,3);c.fill()}
+    c.fillStyle='#888';rr(c,-w*.2,-h*.62,w*.4,h*.1,4);c.fill();
+    c.translate(0,-h*.5);
+  }else{c.fillStyle='#222';rr(c,-w*.5,-h*.42,w*.2,h*.44,w*.05);c.fill();rr(c,w*.3,-h*.42,w*.2,h*.44,w*.05);c.fill()}
+  if(style==='rocket'){ // flames out the back
+    for(const sx of [-.17,.17]){const fl=h*(.22+Math.random()*.12);const g=c.createRadialGradient(sx*w,-h*.24,1,sx*w,-h*.24+fl*.3,fl);
+      g.addColorStop(0,'#fff6b0');g.addColorStop(.4,'#ffb020');g.addColorStop(1,'rgba(255,80,0,0)');c.fillStyle=g;c.beginPath();c.arc(sx*w,-h*.24,fl,0,7);c.fill()}
+    c.fillStyle=shade(col,-.3);for(const sx of [-1,1]){c.beginPath();c.moveTo(sx*w*.5,-h*.8);c.lineTo(sx*w*.68,-h*.35);c.lineTo(sx*w*.5,-h*.4);c.fill()}
+  }
   c.fillStyle=col;rr(c,-w*.5,-h*.86,w,h*.64,w*.14);c.fill();
   c.fillStyle=shade(col,.28);rr(c,-w*.44,-h*.83,w*.88,h*.13,w*.06);c.fill();
+  if(style==='police'){c.fillStyle='#fff';rr(c,-w*.5,-h*.7,w,h*.16,4);c.fill()}
+  if(style==='taxi'){for(let k=0;k<10;k++){c.fillStyle=k%2?'#222':'#fff';c.fillRect(-w*.45+k*w*.09,-h*.72,w*.09,h*.06);c.fillStyle=k%2?'#fff':'#222';c.fillRect(-w*.45+k*w*.09,-h*.66,w*.09,h*.06)}}
+  if(style==='fire'){c.fillStyle='#fff';c.fillRect(-w*.48,-h*.66,w*.96,h*.05)}
   c.fillStyle=shade(col,-.35);rr(c,-w*.47,-h*.34,w*.94,h*.12,w*.05);c.fill();
   c.fillStyle=shade(col,.12);rr(c,-w*.34,-h*1.4,w*.68,h*.62,w*.14);c.fill();
   c.save();rr(c,-w*.27,-h*1.32,w*.54,h*.46,w*.09);c.fillStyle='#c9ecff';c.fill();c.clip();
   const ds=h*.64;c.drawImage(emo(driver),-ds/2,-h*1.27+Math.sin(t*6)*1.5,ds,ds);c.restore();
+  if(style==='fire'){ // ladder + siren
+    c.fillStyle='#cfd6de';c.fillRect(-w*.3,-h*1.5,w*.6,h*.05);c.fillRect(-w*.3,-h*1.62,w*.6,h*.05);
+    for(let k=0;k<6;k++)c.fillRect(-w*.28+k*w*.11,-h*1.62,w*.03,h*.17);
+    c.fillStyle=flash?'#ff2d2d':'#ff9a9a';rr(c,-w*.08,-h*1.75,w*.16,h*.13,6);c.fill();
+  }
+  if(style==='police'){c.fillStyle=flash?'#ff2d2d':'#7a1010';rr(c,-w*.24,-h*1.55,w*.24,h*.15,6);c.fill();c.fillStyle=flash?'#123a8a':'#3d8bff';rr(c,0,-h*1.55,w*.24,h*.15,6);c.fill()}
+  if(style==='taxi'){c.fillStyle='#fff7c2';rr(c,-w*.16,-h*1.6,w*.32,h*.2,6);c.fill();c.fillStyle='#222';c.font=`900 ${Math.round(h*.13)}px system-ui,sans-serif`;c.textAlign='center';c.textBaseline='middle';c.fillText('TAXI',0,-h*1.5)}
   for(const sx of [-1,1]){c.fillStyle='#ff3b3b';c.beginPath();c.arc(sx*w*.36,-h*.58,w*.065,0,7);c.fill();c.fillStyle='rgba(255,255,255,.75)';c.beginPath();c.arc(sx*w*.36-w*.02,-h*.6,w*.02,0,7);c.fill()}
   c.fillStyle='#fff';rr(c,-w*.13,-h*.66,w*.26,h*.17,w*.03);c.fill();
   c.fillStyle='#333';c.font=`900 ${Math.round(h*.11)}px system-ui,sans-serif`;c.textAlign='center';c.textBaseline='middle';c.fillText('BEEP',0,-h*.575);
   c.restore();
 }
 function carW(){return Math.min(W*.26,H*.4)}
-function buddy(){return BUDDIES[S.buddy==null?0:S.buddy]}
+function buddy(){let i=S.buddy==null?0:S.buddy;const b=ALL_BUDDIES[i];return b&&(b.need||0)<=S.stickers.length?b:ALL_BUDDIES[0]}
+function carStyle(){const c=CARS.find(x=>x.id===S.carStyle);return c&&c.need<=S.stickers.length?c.id:'race'}
 function render(){
   ctx.setTransform(DPR,0,0,DPR,0,0);drawBg();renderRoad();
   const bounce=bumpT>0?Math.abs(Math.sin(bumpT*18))*28*bumpT:Math.sin(t*28)*speed/MAXSPEED*1.2;
-  drawCar(W/2+steerVis*W*.012,H-Math.max(6,H*.025),carW(),buddy().c,buddy().e,steerVis,bounce);
+  const b=buddy(),st=carStyle(),w=carW()*(st==='monster'?.9:1);
+  drawCar(ctx,W/2+steerVis*W*.012,H-Math.max(6,H*.025),w,carColor(st,b.c),b.e,steerVis,bounce,st);
 }
 
 /* ---------- fx ---------- */
@@ -559,10 +757,13 @@ function collect(it){
   else{SFX.star();addStars(it.kind==='treat'?3:1,it.e,cx,cy,r);if(it.kind==='treat')burst(cx,cy,'⭐',6,30)}
 }
 function addStars(n,e,x,y,r){flyTo(e,x,y,r.left+r.width/2,r.top+r.height/2,carW()*.45);setTimeout(()=>{stars+=n;starEl.textContent='⭐ '+stars;starEl.classList.remove('pop');void starEl.offsetWidth;starEl.classList.add('pop')},600)}
+let saveT=0;
 function update(dt){
   t+=dt;if(paused)return;
+  if(state!=='title'&&state!=='rest'&&!document.hidden){ // count play time for the rest timer
+    S.play.ms+=dt*1000;S.play.lastActive=Date.now();saveT+=dt;if(saveT>5){saveT=0;save()}}
   if(state==='race'){updateRace(dt);return}
-  const slow=state==='finish'||state==='quiz'||state==='sticker';
+  const slow=['finish','quiz','sticker','mini','unlock'].includes(state);
   const target=slow?(state==='finish'?900:350):1300;speed+=(target-speed)*Math.min(1,dt*1.5);
   if(bumpT>0)bumpT=Math.max(0,bumpT-dt);
   if(!slow){const goal=Math.sin(t*.5)*.35;steerVis+=(clamp((goal-playerX)*4,-1,1)-steerVis)*Math.min(1,dt*4);playerX+=(goal-playerX)*dt}
@@ -579,12 +780,17 @@ function setTheme(th,items){theme=th;buildRoad(th,items);pos=0;lastSeg=-1}
 
 function goBuddy(){
   flowId++;state='buddy';show('buddy');const g=$('#buddyGrid');g.innerHTML='';let chosen=false;
-  BUDDIES.forEach((b,i)=>{const el=document.createElement('button');el.className='btn card';el.style.background=`linear-gradient(${shade(b.c,.25)},${b.c})`;el.textContent=b.e;
-    onTap(el,async()=>{if(chosen)return;chosen=true;S.buddy=i;save();SFX.beep();el.classList.add('wiggle');const my=flowId;await say([[(L()==='es'?b.es:b.name)+'!'],[tr('beep')]]);if(my===flowId)goMap()});g.appendChild(el)});
+  ALL_BUDDIES.forEach((b,i)=>{const el=document.createElement('button');el.className='btn card';el.style.background=`linear-gradient(${shade(b.c,.25)},${b.c})`;el.textContent=b.e;
+    const locked=(b.need||0)>S.stickers.length;
+    if(locked){el.classList.add('locked');el.insertAdjacentHTML('beforeend',`<div class="lock">🔒<small>📒 ${b.need}</small></div>`)}
+    onTap(el,async()=>{if(chosen)return;if(locked){SFX.soft();wiggle(el);say(tr('needStk'));return}
+      chosen=true;S.buddy=i;save();SFX.beep();el.classList.add('wiggle');const my=flowId;await say([[(L()==='es'?b.es:b.name)+'!'],[tr('beep')]]);if(my===flowId)goMap()});g.appendChild(el)});
   say(tr('pickSay'));
 }
 function nextIdx(){for(let i=0;i<S.unlocked;i++)if(!S.completed[i])return i;return -1}
+let greeted=false;
 function goMap(){
+  if(restActive()||limitHit()){goRest();return}
   flowId++;state='map';hush();engineOff();$('#banner').classList.remove('show');
   const ni=nextIdx();setTheme(THEMES[ni<0?ri(0,THEMES.length-1):ni],false);
   show('map');$('#changeBuddy').textContent=buddy().e;
@@ -592,7 +798,41 @@ function goMap(){
   THEMES.forEach((th,i)=>{const b=document.createElement('button');b.className='btn lvl';b.style.background=`linear-gradient(${th.sky[0]} 40%,${th.g[0]})`;b.textContent=th.icon;
     const open=i<S.unlocked;if(!open)b.classList.add('locked');if(S.completed[i])b.classList.add('done');if(i===ni)b.classList.add('next');
     onTap(b,()=>{if(open){SFX.tap();startLevel(i)}else{SFX.soft();say(tr('bouncy'))}});box.appendChild(b)});
-  say(tr('where'));
+  if(!greeted&&nm()){greeted=true;say([...nameJoin(L()==='es'?'¡Hola':'Hi'),[tr('where')]])}else say(tr('where'));
+}
+// ---- rest screen ----
+function goRest(){
+  flowId++;state='rest';hush();engineOff();$('#banner').classList.remove('show');
+  if(!S.restUntil){S.restUntil=+S.settings.restMin===-1?-1:Date.now()+(+S.settings.restMin||30)*60000;save()}
+  $('#restBuddy').textContent=buddy().e;updateRestText();show('rest');
+  say([...nameJoin(L()==='es'?'¡Hora de descansar':'Time to rest'),[tr('restBye')]]);
+}
+function updateRestText(){$('#restSub').textContent=S.restUntil===-1?tr('restLocked'):tr('restIn')(Math.max(1,Math.ceil((S.restUntil-Date.now())/60000)))}
+setInterval(()=>{if(state!=='rest'||paused)return;if(!restActive()){goTitle();return}updateRestText()},15000);
+// ---- garage: pick a car style (more unlock with stickers) ----
+function goGarage(){
+  flowId++;state='garage';show('garage');const g=$('#garageGrid');g.innerHTML='';const b=buddy(),cur=carStyle();
+  CARS.forEach(cs=>{const el=document.createElement('div');el.className='gcard';const locked=cs.need>S.stickers.length;
+    const cvs=document.createElement('canvas');cvs.width=360;cvs.height=280;el.appendChild(cvs);
+    drawCar(cvs.getContext('2d'),180,262,cs.id==='monster'?170:200,carColor(cs.id,b.c),b.e,0,0,cs.id);
+    if(locked){el.classList.add('locked');el.insertAdjacentHTML('beforeend',`<div class="lock">🔒<small>📒 ${cs.need}</small></div>`)}
+    if(cs.id===cur)el.classList.add('sel');
+    onTap(el,()=>{if(locked){SFX.soft();wiggle(el);say(tr('needStk'));return}S.carStyle=cs.id;save();SFX.beep();
+      g.querySelectorAll('.gcard').forEach(x=>x.classList.remove('sel'));el.classList.add('sel');wiggle(el);say(L()==='es'?cs.es+'!':cs.en+'!')});
+    g.appendChild(el)});
+  say(tr('garage'));
+}
+function showUnlock(u,my){
+  return new Promise(resolve=>{
+    state='unlock';show('unlock');const isCar=u.kind==='car',b=isCar?buddy():u.item,st=isCar?u.item.id:carStyle();
+    $('#unlockTitle').textContent=tr(isCar?'unlockCar':'unlockBuddy');
+    const cvs=$('#unlockCan'),x=cvs.getContext('2d');x.clearRect(0,0,cvs.width,cvs.height);
+    drawCar(x,300,420,st==='monster'?290:340,carColor(st,b.c),b.e,0,0,st);
+    SFX.yay();confetti();const nmx=isCar?(L()==='es'?u.item.es:u.item.en):(L()==='es'?u.item.es:u.item.name);
+    say([[tr(isCar?'unlockCar':'unlockBuddy')],[nmx+'!']]);
+    let done=false;const fin=()=>{if(done)return;done=true;SFX.tap();resolve()};
+    $('#unlockNext').onpointerup=e=>{e.preventDefault();fin()};setTimeout(()=>{if(my===flowId)fin()},7000);
+  });
 }
 function startLevel(li){
   flowId++;hush();level=li;setTheme(THEMES[li],true);speed=0;playerX=0;steerVis=0;stars=0;bumpT=0;raceT=0;lastInputT=0;
@@ -602,17 +842,101 @@ function startLevel(li){
 async function finishLevel(){
   const my=++flowId;state='finish';engineOff();touches.clear();
   $('#banner').classList.add('show');confetti();SFX.yay();
-  S.totalStars+=stars;S.completed[level]=true;S.unlocked=Math.max(S.unlocked,Math.min(THEMES.length,level+2));S.levelsDone++;save();
-  await say(tr('didSay')(stars));await sleep(500);if(my!==flowId)return;
+  S.totalStars+=stars;S.completed[level]=true;S.unlocked=Math.max(S.unlocked,Math.min(THEMES.length,level+2));S.levelsDone++;
+  S.play.races++;dayRec().races++;save();
+  const es=L()==='es';
+  await say([...nameJoin(es?'¡Lo lograste':'You did it'),[es?`¡Ganaste ${stars} ${stars===1?'estrella':'estrellas'}!`:`You got ${stars} ${stars===1?'star':'stars'}!`]]);
+  await sleep(500);if(my!==flowId)return;
   $('#banner').classList.remove('show');
   state='quiz';const n=S.settings.perLevel;
   for(let i=0;i<n;i++){await askOne(nextQuestion(),i,n,my);if(my!==flowId)return}
-  state='sticker';await giveSticker(my);if(my!==flowId)return;goMap();
+  const before=S.stickers.length;
+  state='sticker';await giveSticker(my);if(my!==flowId)return;
+  const after=S.stickers.length;
+  const unlocks=[...CARS.filter(c=>c.need>before&&c.need<=after).map(item=>({kind:'car',item})),...EXTRA_BUDDIES.filter(b=>b.need>before&&b.need<=after).map(item=>({kind:'buddy',item}))];
+  for(const u of unlocks){await showUnlock(u,my);if(my!==flowId)return}
+  if(S.settings.minigames&&S.levelsDone%2===0&&!limitHit()){state='mini';await runMini(my);if(my!==flowId)return}
+  goMap();
 }
+
+/* ---------- mini-games ---------- */
+let miniPrompt=null;
+function miniOpen(titleKey,prompt){
+  show('mini');$('#miniTitle').textContent=tr(titleKey);miniPrompt=prompt;
+  const card=$('.minicard');card.style.animation='none';void card.offsetWidth;card.style.animation='';
+  const area=$('#miniArea');area.innerHTML='';return area;
+}
+onTap($('#miniSpeak'),()=>{unlock();SFX.tap();if(miniPrompt)say(miniPrompt)});
+async function miniFinish(lines){SFX.yay();confetti();await sleep(300);await playClip('right');await say(lines);await sleep(700)}
+function runMini(my){const kinds=['wash','gas','park'];const k=kinds[(S.miniIdx++)%3];save();return k==='wash'?miniWash(my):k==='gas'?miniGas(my):miniPark(my)}
+function nagger(my,getLast,lines,isDone){const iv=setInterval(()=>{if(my!==flowId||isDone()){clearInterval(iv);return}if(paused)return;if(Date.now()-getLast()>10000){say(lines);getLast(true)}},1000);return iv}
+// Car wash: rub the mud off with a finger
+function miniWash(my){return new Promise(resolve=>{
+  const area=miniOpen('wash',tr('washSay'));const r=area.getBoundingClientRect(),Wd=r.width,Hd=r.height;
+  const mk=()=>{const c=document.createElement('canvas');c.width=Math.round(Wd*DPR);c.height=Math.round(Hd*DPR);area.appendChild(c);const x=c.getContext('2d');x.scale(DPR,DPR);return [c,x]};
+  const [,cx]=mk(),[mc,mx]=mk();
+  cx.fillStyle='#bfe9ff';cx.fillRect(0,0,Wd,Hd);cx.fillStyle='#8fd0f2';cx.fillRect(0,Hd*.8,Wd,Hd*.2);
+  for(let i=0;i<14;i++){cx.fillStyle='rgba(255,255,255,.6)';cx.beginPath();cx.arc(rand(0,Wd),rand(0,Hd*.75),rand(6,18),0,7);cx.fill()}
+  const b=buddy(),st=carStyle(),w=Math.min(Wd*.5,Hd*.9/(st==='monster'?1.4:.9)),base=Hd*.95;
+  drawCar(cx,Wd/2,base,w,carColor(st,b.c),b.e,0,0,st);
+  const top=base-w*(st==='monster'?1.35:.86);
+  mx.fillStyle='#7a4a1f';
+  for(let i=0;i<34;i++){const x=Wd/2+rand(-.5,.5)*w,y=rand(top,base-w*.05),R=rand(.06,.12)*w;mx.globalAlpha=rand(.85,1);mx.beginPath();mx.arc(x,y,R,0,7);mx.fill();
+    for(let k=0;k<2;k++){mx.beginPath();mx.arc(x+rand(-R,R),y+rand(-R,R),R*rand(.3,.6),0,7);mx.fill()}}
+  mx.globalAlpha=1;
+  const sample=()=>{const d=mx.getImageData(0,0,mc.width,mc.height).data,step=Math.max(4,Math.round(10*DPR));let n=0;for(let y=0;y<mc.height;y+=step)for(let x=0;x<mc.width;x+=step)if(d[(y*mc.width+x)*4+3]>40)n++;return n};
+  const total=sample()||1;let done=false,lastRub=Date.now(),scrubT=0,down=false;
+  mx.globalCompositeOperation='destination-out';
+  const rub=e=>{if(done)return;const rc=mc.getBoundingClientRect(),x=e.clientX-rc.left,y=e.clientY-rc.top;mx.beginPath();mx.arc(x,y,w*.1,0,7);mx.fill();lastRub=Date.now();
+    if(Math.random()<.35)parts.push({k:'e',e:'🫧',x:e.clientX+rand(-20,20),y:e.clientY+rand(-20,20),vx:rand(-40,40),vy:rand(-160,-60),r:0,vr:rand(-2,2),size:rand(18,34),life:rand(.6,1),g:-40});
+    if(Date.now()-scrubT>90){scrubT=Date.now();tone(rand(700,1100),.05,{type:'triangle',vol:.05})}};
+  mc.addEventListener('pointerdown',e=>{down=true;try{mc.setPointerCapture(e.pointerId)}catch(_){}rub(e)});
+  mc.addEventListener('pointermove',e=>{if(down)rub(e)});
+  for(const ev of ['pointerup','pointercancel'])mc.addEventListener(ev,()=>down=false);
+  say(tr('washSay'));
+  nagger(my,(reset)=>reset?(lastRub=Date.now()):lastRub,tr('washHint'),()=>done);
+  const iv=setInterval(async()=>{if(my!==flowId){clearInterval(iv);return}if(paused||done)return;
+    if(sample()<=total*.12){done=true;clearInterval(iv);mx.clearRect(0,0,Wd,Hd);const rc=mc.getBoundingClientRect();burst(rc.left+Wd/2,rc.top+top+w*.3,'✨',10,40);
+      await miniFinish(tr('washDone'));if(my===flowId)resolve()}},400);
+})}
+// Gas station: tap the pump N times, counting out loud
+function miniGas(my){return new Promise(resolve=>{
+  const n=ri(2,mathMax()===5?5:8),lg=L();const area=miniOpen('gas',tr('gasSay')(n));
+  area.innerHTML=`<div class="gasgame"><div class="gasleft"><div class="gasnum">${n}</div><div class="drops">${'<span>💧</span>'.repeat(n)}</div></div><button class="btn green pump">⛽</button><div class="gauge"><i></i></div></div>`;
+  let k=0,done=false,last=Date.now();const drops=area.querySelectorAll('.drops span'),fill=area.querySelector('.gauge i'),pump=area.querySelector('.pump');
+  onTap(pump,async()=>{if(done)return;last=Date.now();k++;drops[k-1].classList.add('on');fill.style.height=(k/n*100)+'%';SFX.count(k);wiggle(pump);say([[NUMS[lg][k]]]);
+    if(k===n){done=true;await sleep(900);await miniFinish(tr('gasDone')(n));if(my===flowId)resolve()}});
+  say(tr('gasSay')(n));nagger(my,(reset)=>reset?(last=Date.now()):last,tr('gasSay')(n),()=>done);
+})}
+// Parking: drag each car onto the spot with its color
+function miniPark(my){return new Promise(resolve=>{
+  const area=miniOpen('park',tr('parkSay'));const cols=shuffle(COLORS.filter(c=>['red','blue','yellow','green'].includes(c[1]))).slice(0,3);
+  area.innerHTML='<div class="park"><div class="spots"></div><div class="pcars"></div></div>';
+  const spotsEl=area.querySelector('.spots'),carsEl=area.querySelector('.pcars');const cname=c=>L()==='es'?c[2]:c[1];
+  shuffle(cols.slice()).forEach(c=>{const s=document.createElement('div');s.className='spot';s.style.borderColor=c[0];s.style.background=c[0]+'40';s.textContent='P';s.dataset.c=c[1];spotsEl.appendChild(s)});
+  let parked=0,last=Date.now();const b=buddy();
+  cols.forEach(c=>{const d=document.createElement('div');d.className='pcar';const cv2=document.createElement('canvas');cv2.width=300;cv2.height=230;d.appendChild(cv2);carsEl.appendChild(d);
+    drawCar(cv2.getContext('2d'),150,222,230,c[0],b.e,0,0,'race');
+    let sx=0,sy=0,drag=false;
+    d.addEventListener('pointerdown',e=>{if(d.classList.contains('parked'))return;drag=true;last=Date.now();try{d.setPointerCapture(e.pointerId)}catch(_){}sx=e.clientX;sy=e.clientY;d.classList.add('drag');d.style.transition='none';SFX.tap();say([[cname(c)+'!']])});
+    d.addEventListener('pointermove',e=>{if(drag)d.style.transform=`translate(${e.clientX-sx}px,${e.clientY-sy}px) scale(1.08)`});
+    const end=async()=>{if(!drag)return;drag=false;d.classList.remove('drag');last=Date.now();
+      const cr=d.getBoundingClientRect(),mx=cr.left+cr.width/2,my2=cr.top+cr.height/2;let hit=null;
+      spotsEl.querySelectorAll('.spot').forEach(s=>{const q=s.getBoundingClientRect();if(mx>q.left-25&&mx<q.right+25&&my2>q.top-25&&my2<q.bottom+60)hit=s});
+      if(hit&&hit.dataset.c===c[1]&&!hit.classList.contains('full')){
+        hit.textContent='';hit.appendChild(d);d.style.transform='';d.classList.add('parked');hit.classList.add('full');SFX.beep();parked++;say([[cname(c)+'!']]);
+        if(parked===cols.length){await sleep(700);await miniFinish(tr('parkDone'));if(my===flowId)resolve()}
+      }else{d.style.transition='transform .35s';d.style.transform='';if(hit){SFX.soft();say(tr('parkTry')(cname(c)))}}};
+    d.addEventListener('pointerup',end);d.addEventListener('pointercancel',end)});
+  say(tr('parkSay'));nagger(my,(reset)=>reset?(last=Date.now()):last,tr('parkSay'),()=>parked===cols.length);
+})}
 
 /* ---------- questions ---------- */
 let lastSub=null,recent=[];
-function mathMax(){return S.settings.math==='medium'?10:5}
+function mathMax(){const m=S.settings.math;return m==='medium'?10:m==='easy'?5:(S.adapt.level||5)}
+// Prefer things he still gets wrong about half the time
+function freshW(list,rkey,skey){if(Math.random()<.5){const weak=list.filter(x=>{const it=S.stats.items[skey(x)];return it&&it.n>=1&&it.ok/it.n<.6&&!recent.includes(rkey(x))});
+  if(weak.length){const p=pick(weak);recent.push(rkey(p));if(recent.length>8)recent.shift();return p}}return fresh(list,rkey)}
 function numChoices(n,min,max){const set=new Set([n]);for(const c of shuffle([n-1,n+1,n-2,n+2,n+3,n-3])){if(set.size>=3)break;if(c>=min&&c<=max)set.add(c)}let v=min;while(set.size<3){set.add(v);v++}return shuffle([...set])}
 function numAnswers(n,min,max){return numChoices(n,min,max).map(v=>({ok:v===n,html:`<div class="num">${v}</div><div class="dots">${'<i></i>'.repeat(v)}</div>`}))}
 function items(e,n,cls=''){return Array.from({length:n},()=>`<span class="it ${cls}"><span class="g">${e}</span></span>`).join('')}
@@ -634,7 +958,7 @@ function qty(n,it,lang){const [,one,many,esOne,esMany,fem]=it;
 function makeAdd(){
   const max=mathMax();let a,b;do{a=ri(1,max===5?3:6);b=ri(1,max===5?3:5)}while(a+b>max);
   const it=fresh(COUNT_ITEMS,x=>x[0]),e=it[0],n=a+b,fs=itemSize(a+b,2),lg=L(),es=lg==='es',Q=k=>qty(k,it,lg);
-  return {tag:'math',math:true,
+  return {tag:'math',math:true,key:`add:${a}+${b}`,label:`${a} + ${b}`,
     visual:`<div class="eq" style="font-size:${fs}px"><div class="grp">${items(e,a)}</div><div class="op">+</div><div class="grp">${items(e,b)}</div></div><div class="numline">${a} + ${b} = ?</div>`,
     answers:numAnswers(n,0,10),
     prompt:es?[['¿Cuánto es'],[`${Q(a)} más ${Q(b)}?`]]:[['What is'],[`${Q(a)} plus ${Q(b)}?`]],
@@ -643,7 +967,7 @@ function makeAdd(){
 }
 function makeSub(){
   const max=mathMax();const a=ri(2,max),b=ri(1,a-1),n=a-b;const [e,,many,,esMany,fem]=fresh(COUNT_ITEMS,x=>x[0]),fs=itemSize(a),es=L()==='es';
-  return {tag:'math',math:true,
+  return {tag:'math',math:true,key:`sub:${a}-${b}`,label:`${a} − ${b}`,
     visual:`<div class="eq" style="font-size:${fs}px"><div class="grp">${items(e,n)}${items(e,b,'leaving')}</div></div><div class="numline">${a} − ${b} = ?</div>`,
     answers:numAnswers(n,0,10),
     prompt:es?[[`${a} ${esMany}.`],[b===1?(fem?'Se va una.':'Se va uno.'):`Se van ${b}.`],[fem?'¿Cuántas quedan?':'¿Cuántos quedan?']]
@@ -655,7 +979,7 @@ function makeSub(){
 }
 function makeCount(){
   const n=ri(1,mathMax());const [e,one,many,esOne,esMany,fem]=fresh(COUNT_ITEMS,x=>x[0]),fs=itemSize(n),es=L()==='es';
-  return {tag:'count',math:true,visual:`<div class="eq" style="font-size:${fs}px"><div class="grp">${items(e,n)}</div></div>`,
+  return {tag:'count',math:true,key:`cnt:${n}`,label:`count ${n}`,visual:`<div class="eq" style="font-size:${fs}px"><div class="grp">${items(e,n)}</div></div>`,
     answers:numAnswers(n,1,10),
     prompt:es?[[`¿${fem?'Cuántas':'Cuántos'} ${esMany}?`]]:[[`How many ${many}?`]],
     praise:es?[['¡Sí!'],[n===1?`${fem?'Una':'Un'} ${esOne}.`:`${n} ${esMany}.`]]:[['Yes!'],[`${n} ${n===1?one:many}.`]],
@@ -664,7 +988,7 @@ function makeCount(){
 function hintTeach(lines){return async function(vis,el){el.classList.add('hint');await say(lines,false)}}
 // tl = language being taught (en or es); the game talks in L()
 function makeColor(tl){
-  const opts=shuffle(COLORS.slice()).slice(0,3),tg=fresh(opts,x=>x[1]),[,en,es]=tg,nl=L();
+  const tg=freshW(COLORS,x=>x[1],x=>`c:${tl}:${x[1]}`),opts=shuffle([tg,...shuffle(COLORS.filter(c=>c!==tg)).slice(0,2)]),[,en,es]=tg,nl=L();
   const answers=opts.map(c=>({ok:c===tg,html:`<div class="blob" style="background:${c[0]}"></div>`}));
   const sub=tl!==nl?`<div class="wordsub">${tl==='es'?'Español':'English'}</div>`:'';
   let prompt,praise,teach;
@@ -672,11 +996,11 @@ function makeColor(tl){
   else if(nl==='es'&&tl==='es'){prompt=[[`¿Cuál es ${es}?`]];praise=[['¡Sí!'],[`Es ${es}.`]];teach=[['Este es'],[`¡${es}!`]]}
   else if(nl==='en'){prompt=[['Which one is','en'],[es+'?','es']];praise=[['¡Sí!','es'],[cap(es)+'!','es'],[`That's ${en}.`,'en']];teach=[['This one is','en'],[es+'.','es'],[`That means ${en}.`,'en']]}
   else{prompt=[['¿Cuál es','es'],[en+'?','en']];praise=[['¡Sí!','es'],[cap(en)+'!','en'],[`Es ${es}.`,'es']];teach=[['Este es','es'],[en+'.','en'],[`Quiere decir ${es}.`,'es']]}
-  return {tag:tl==='es'?'spanish':'english',visual:`<div class="bigemoji">🎨</div><div class="wordbig">${tl==='es'?es:en}</div>${sub}`,answers,prompt,praise,teach:hintTeach(teach)};
+  return {tag:tl==='es'?'spanish':'english',key:`c:${tl}:${en}`,label:tl==='es'?`${es} (${en})`:en,visual:`<div class="bigemoji">🎨</div><div class="wordbig">${tl==='es'?es:en}</div>${sub}`,answers,prompt,praise,teach:hintTeach(teach)};
 }
 function makeWord(tl){
   if(Math.random()<.3)return makeColor(tl);
-  const tg=fresh(WORDS,x=>x[1]);const others=shuffle(WORDS.filter(w=>w!==tg)).slice(0,2);const opts=shuffle([tg,...others]);
+  const tg=freshW(WORDS,x=>x[1],x=>`w:${tl}:${x[1]}`);const others=shuffle(WORDS.filter(w=>w!==tg)).slice(0,2);const opts=shuffle([tg,...others]);
   const answers=opts.map(w=>({ok:w===tg,html:`<div class="pic">${w[0]}</div>`}));const [,en,es]=tg,nl=L();
   const sub=tl!==nl?`<div class="wordsub">${tl==='es'?'Español':'English'}</div>`:'';
   let prompt,praise,teach;
@@ -684,22 +1008,81 @@ function makeWord(tl){
   else if(nl==='es'&&tl==='es'){prompt=[['¿Dónde está'],[es+'?']];praise=[['¡Sí!'],[`¡${cap(es)}!`]];teach=[['Aquí está'],[`¡${es}!`]]}
   else if(nl==='en'){prompt=[['Can you find','en'],[es+'?','es']];praise=[['¡Muy bien!','es'],[cap(es)+'.','es'],[`That's the ${en}.`,'en']];teach=[['This one is','en'],[es+'.','es'],[`That means the ${en}.`,'en']]}
   else{prompt=[['¿Dónde está','es'],[`the ${en}?`,'en']];praise=[['¡Muy bien!','es'],[`The ${en}.`,'en'],[`Es ${es}.`,'es']];teach=[['Aquí está','es'],[`the ${en}.`,'en'],[`Quiere decir ${es}.`,'es']]}
-  return {tag:tl==='es'?'spanish':'english',visual:`<div class="wordbig">${tl==='es'?es:en}</div>${sub}`,answers,prompt,praise,teach:hintTeach(teach)};
+  return {tag:tl==='es'?'spanish':'english',key:`w:${tl}:${en}`,label:tl==='es'?`${es} (${en})`:en,visual:`<div class="wordbig">${tl==='es'?es:en}</div>${sub}`,answers,prompt,praise,teach:hintTeach(teach)};
 }
 function makeLetter(){
-  const es=L()==='es',MAP=es?LETTERS_ES:LETTERS,keys=Object.keys(MAP);const ch=fresh(keys,x=>'L'+x);
+  const lg=L(),es=lg==='es',MAP=es?LETTERS_ES:LETTERS,keys=Object.keys(MAP);
+  const sounds=Math.random()<.4; // "which letter does ball start with?" — beginning sounds
+  const ch=freshW(keys,x=>'L'+x,x=>`${sounds?'ls':'l'}:${lg}:${x}`);
   const opts=shuffle([ch,...shuffle(keys.filter(k=>k!==ch)).slice(0,2)]);const [e,word]=MAP[ch];
-  return {tag:'letters',visual:`<div class="bigemoji">${e}</div><div class="wordbig"><span class="hl">${word[0].toUpperCase()}</span>${word.slice(1)}</div>`,
-    answers:opts.map(k=>({ok:k===ch,html:`<div class="letter">${k}</div>`})),
+  const answers=opts.map(k=>({ok:k===ch,html:`<div class="letter">${k}</div>`}));
+  if(sounds){const syl=SYL_ES[ch]||ch.toLowerCase(),snd=PHON_EN[ch]||ch;
+    return {tag:'letters',key:`ls:${lg}:${ch}`,label:`${ch}… ${word}`,answers,
+      visual:`<div class="bigemoji">${e}</div><div class="wordbig"><span class="hl">?</span>${word.slice(1)}</div>`,
+      prompt:es?[[cap(word)+'.'],['¿Con qué letra empieza'],[word+'?']]:[[cap(word)+'.'],['Which letter does'],[`${word} start with?`]],
+      praise:es?[['¡Sí!'],[`${cap(word)} empieza con ${ch}.`],[`${syl}… ${syl}… ${word}.`]]:[['Yes!'],[`${cap(word)} starts with ${ch}.`],[`${snd}, ${snd}, ${word}!`]],
+      teach:hintTeach(es?[[`${cap(word)} empieza con`],[`${ch}.`],[`${syl}… ${word}.`]]:[[`${cap(word)} starts with`],[`${ch}.`],[`${snd}, ${snd}, ${word}.`]])}}
+  return {tag:'letters',key:`l:${lg}:${ch}`,label:ch,answers,
+    visual:`<div class="bigemoji">${e}</div><div class="wordbig"><span class="hl">${word[0].toUpperCase()}</span>${word.slice(1)}</div>`,
     prompt:es?[[`Busca la letra ${ch}.`],[`${ch} de ${word}.`]]:[[`Find the letter ${ch}.`],[`${ch} is for ${word}.`]],
     praise:es?[['¡Sí!'],[`Es la ${ch}.`],[`${ch} de ${word}.`]]:[['Yes!'],[`That's ${ch}.`],[`${ch} is for ${word}!`]],
     teach:hintTeach(es?[['Esta es la letra'],[`${ch}.`]]:[['This is the letter'],[`${ch}.`]])};
 }
+// Find the written number (no dots to count)
+function makeNumber(){
+  const lg=L(),es=lg==='es',max=mathMax(),n=freshW(Array.from({length:max},(_,i)=>i+1),x=>'N'+x,x=>`n:${x}`);
+  return {tag:'numbers',key:`n:${n}`,label:String(n),
+    visual:`<div class="bigemoji">🔢</div><div class="wordbig">${es?'número':'number'} ${NUMS[lg][n]}</div>`,
+    answers:numChoices(n,1,max).map(v=>({ok:v===n,html:`<div class="num big">${v}</div>`})),
+    prompt:[[es?`Busca el número ${n}.`:`Find the number ${n}.`]],
+    praise:es?[['¡Sí!'],[`¡Es el ${n}!`]]:[['Yes!'],[`That's ${n}!`]],
+    async teach(vis,el){el.classList.add('hint');el.insertAdjacentHTML('beforeend',`<div class="dots">${'<i></i>'.repeat(n)}</div>`);await say(es?[[`Este es el ${n}.`]]:[[`This is ${n}.`]],false)}};
+}
+function shapeSvg(s,col){return `<svg viewBox="0 0 100 100" class="shp" style="fill:${col}">${s.svg}</svg>`}
+function makeShape(){
+  if(Math.random()<.3)return makeSize();
+  const lg=L(),es=lg==='es',tg=freshW(SHAPES,x=>'S'+x.id,x=>`s:${x.id}`),opts=shuffle([tg,...shuffle(SHAPES.filter(s=>s!==tg)).slice(0,2)]),cols=shuffle(SHAPE_COLORS.slice());
+  return {tag:'shapes',key:`s:${tg.id}`,label:tg.en,
+    visual:`<div class="bigemoji">🔷</div><div class="wordbig">${es?tg.es:tg.en}</div>`,
+    answers:opts.map((s,i)=>({ok:s===tg,html:shapeSvg(s,cols[i])})),
+    prompt:es?[['¿Dónde está'],[tg.es+'?']]:[['Can you find'],[`the ${tg.en}?`]],
+    praise:es?[['¡Sí!'],[`¡${cap(tg.es)}!`]]:[['Yes!'],[`That's the ${tg.en}.`]],
+    teach:hintTeach(es?[['Aquí está'],[tg.es+'.']]:[['Here is'],[`the ${tg.en}.`]])};
+}
+function makeSize(){
+  const es=L()==='es',big=Math.random()<.5,e=pick(['🐘','🐻','🍎','⭐','🚗','🐶','🎈','🐟']),sizes=shuffle([.42,.68,1]),goal=big?1:.42;
+  const word=es?(big?'el más grande':'el más pequeño'):(big?'the biggest':'the smallest');
+  return {tag:'shapes',key:big?'size:big':'size:small',label:big?'biggest':'smallest',
+    visual:`<div class="bigemoji">${big?'🐘':'🐭'}</div><div class="wordbig">${word}</div>`,
+    answers:sizes.map(s=>({ok:s===goal,html:`<div class="pic" style="font-size:calc(min(19vmin,118px)*${s})">${e}</div>`})),
+    prompt:[[es?`¿Cuál es ${word}?`:`Which one is ${word}?`]],
+    praise:es?[['¡Sí!'],[`¡Ese es ${word}!`]]:[['Yes!'],[`That's ${word} one!`]],
+    teach:hintTeach(es?[[`Este es ${word}.`]]:[[`This one is ${word}.`]])};
+}
+// What comes next? AB (easy), or AAB / ABC once math is going well
+function makePattern(){
+  const es=L()==='es',set=pick(PAT_SETS),hard=mathMax()>5&&Math.random()<.5,nameOf=x=>es?x[2]:x[1];
+  let unit;if(hard){if(Math.random()<.5)unit=shuffle(set.slice()).slice(0,3);else{const [a,b]=shuffle(set.slice());unit=[a,a,b]}}else unit=shuffle(set.slice()).slice(0,2);
+  const len=unit.length===2?4:5,seq=Array.from({length:len},(_,i)=>unit[i%unit.length]),next=unit[len%unit.length];
+  const opts=shuffle([next,...shuffle(set.filter(x=>x!==next)).slice(0,2)]),kind=unit.length===2?'AB':unit[0]===unit[1]?'AAB':'ABC';
+  return {tag:'patterns',key:`pat:${kind}`,label:`${kind} pattern`,
+    visual:`<div class="eq" style="font-size:${itemSize(len+1)}px">${seq.map(x=>`<span class="it"><span class="g">${x[0]}</span></span>`).join('')}<span class="it qbox"><span class="g">❓</span></span></div>`,
+    answers:opts.map(x=>({ok:x===next,html:`<div class="pic">${x[0]}</div>`})),
+    prompt:[[es?'¿Qué sigue?':'What comes next?']],
+    praise:es?[['¡Sí!'],[`¡Sigue ${nameOf(next)}!`]]:[['Yes!'],[`${cap(nameOf(next))} comes next!`]],
+    async teach(vis,el){const its=[...vis.querySelectorAll('.it:not(.qbox)')];
+      for(let i=0;i<its.length;i++){if(this.dead)return;its[i].classList.add('lit');await say([[nameOf(seq[i])]],false);await sleep(150)}
+      if(this.dead)return;el.classList.add('hint');await say(es?[['Luego sigue…'],[nameOf(next)+'!']]:[['Then comes…'],[nameOf(next)+'!']],false)}};
+}
 function nextQuestion(){
   let subs=Object.keys(S.settings.subjects).filter(k=>S.settings.subjects[k]);if(!subs.length)subs=['math'];
-  if(subs.length>1)subs=subs.filter(s=>s!==lastSub);const k=pick(subs);lastSub=k;
-  switch(k){case 'math':return (S.settings.math==='medium'||S.levelsDone>2)&&Math.random()<.45?makeSub():makeAdd();
-    case 'count':return makeCount();case 'english':return makeWord('en');case 'spanish':return makeWord('es');default:return makeLetter()}
+  if(subs.length>1)subs=subs.filter(s=>s!==lastSub);
+  // topics he finds harder come up a bit more often
+  const w=subs.map(k=>{const tp=S.stats.topics[k];return tp&&tp.n>=3?1+(1-tp.ok/tp.n)*1.5:1});
+  let r=Math.random()*w.reduce((a,b)=>a+b,0),k=subs[0];for(let i=0;i<subs.length;i++){r-=w[i];if(r<=0){k=subs[i];break}}lastSub=k;
+  switch(k){case 'math':return (S.settings.math==='medium'||mathMax()>5||S.levelsDone>2)&&Math.random()<.45?makeSub():makeAdd();
+    case 'count':return makeCount();case 'numbers':return makeNumber();case 'shapes':return makeShape();case 'patterns':return makePattern();
+    case 'english':return makeWord('en');case 'spanish':return makeWord('es');default:return makeLetter()}
 }
 let curQ=null;
 function wiggle(el){el.classList.remove('wiggle');void el.offsetWidth;el.classList.add('wiggle')}
@@ -715,8 +1098,13 @@ function askOne(q,i,total,my){
         if(locked||q.dead)return;
         q.poke();
         if(a.ok){q.dead=true;hush();b.classList.remove('hint');b.classList.add('right');ans.classList.add('solved');SFX.yay();confetti(90);
-          await say(q.praise);await sleep(400);resolve();return}
-        wiggle(b);SFX.soft();if(teaching)return;teaching=true;
+          recordAnswer(q,!q.missed);
+          let pr=q.praise;const first=pr[0]&&pr[0][0];
+          if(nm()&&Math.random()<.6&&/^(¡?)(Sí|Yes|Muy bien)!$/.test(first))pr=[...nameJoin(first.slice(0,-1),pr[0][1]||L()),...pr.slice(1)];
+          await sleep(250);await playClip('right');
+          await say(pr);await sleep(400);resolve();return}
+        q.missed=true;wiggle(b);SFX.soft();if(teaching)return;teaching=true;
+        await playClip('wrong');if(q.dead||my!==flowId)return;
         await say(tr(q.math?'countTog':'lookTog'));if(q.dead||my!==flowId)return;
         await q.teach(vis,right());if(q.dead)return;right().classList.add('hint');teaching=false});
     });
@@ -724,7 +1112,9 @@ function askOne(q,i,total,my){
     setTimeout(()=>locked=false,700);
     let lastAct=Date.now(),repeats=0;q.poke=()=>{lastAct=Date.now()};
     const ask=()=>{if(!q.dead&&my===flowId){lastAct=Date.now();say(q.prompt)}};
-    sleep(600).then(ask);
+    // sometimes start with his name: "Jorgito, ¿cuánto es…?"
+    sleep(600).then(()=>{if(q.dead||my!==flowId)return;lastAct=Date.now();
+      say(nm()&&Math.random()<.3?[[nm()+',',S.settings.nameLang||'es'],...q.prompt]:q.prompt)});
     // nobody tapped for a while? ask again (up to 3 times)
     const nag=setInterval(()=>{if(q.dead||my!==flowId){clearInterval(nag);return}
       if(!paused&&!teaching&&!(synth&&synth.speaking)&&Date.now()-lastAct>11000&&repeats<3){repeats++;ask();const sp=$('#qSpeak');wiggle(sp)}},1000);
@@ -755,8 +1145,84 @@ function goBook(){
 const pc=$('#pcorner');let holdT=null;
 pc.addEventListener('pointerdown',e=>{e.stopPropagation();pc.classList.add('holding');clearTimeout(holdT);holdT=setTimeout(()=>{pc.classList.remove('holding');openParent()},3000)});
 for(const ev of ['pointerup','pointercancel','pointerleave'])pc.addEventListener(ev,()=>{clearTimeout(holdT);pc.classList.remove('holding')});
+/* ---------- family voice: grown-ups record "¡Eso es!" etc. — saved only on this phone ---------- */
+const VDB={db:null,
+  open(){if(this.db)return Promise.resolve(this.db);return new Promise((res,rej)=>{if(!window.indexedDB){rej(new Error('no storage'));return}
+    const r=indexedDB.open('beepbeep',1);r.onupgradeneeded=()=>r.result.createObjectStore('clips',{keyPath:'id'});r.onsuccess=()=>{this.db=r.result;res(this.db)};r.onerror=()=>rej(r.error)})},
+  async run(mode,fn){const db=await this.open();return new Promise((res,rej)=>{const tx=db.transaction('clips',mode),req=fn(tx.objectStore('clips'));tx.oncomplete=()=>res(req&&req.result);tx.onerror=()=>rej(tx.error)})},
+  all(){return this.run('readonly',s=>s.getAll())},put(c){return this.run('readwrite',s=>s.put(c))},del(id){return this.run('readwrite',s=>s.delete(id))}};
+let CLIPS=[];
+async function loadClips(){try{CLIPS=(await VDB.all())||[]}catch(e){CLIPS=[]}}
+// cut the silence before and after the words so it sounds snappy
+function trimRange(buf){const d=buf.getChannelData(0),sr=buf.sampleRate;let peak=0;for(let i=0;i<d.length;i+=4)peak=Math.max(peak,Math.abs(d[i]));
+  const th=Math.max(.015,peak*.08);let a=0,b=d.length-1;while(a<d.length&&Math.abs(d[a])<th)a++;while(b>a&&Math.abs(d[b])<th)b--;
+  a=Math.max(0,a-sr*.06);b=Math.min(d.length,b+sr*.15);if(b<=a){a=0;b=d.length}return [a/sr,b/sr]}
+async function playClipObj(c){
+  audioInit();if(!AC||!c)return;
+  try{if(!c.buf){c.buf=await new Promise((res,rej)=>AC.decodeAudioData(c.data.slice(0),res,rej));c.trim=trimRange(c.buf)}
+    const src=AC.createBufferSource(),g=AC.createGain();src.buffer=c.buf;g.gain.value=1.3;src.connect(g);g.connect(AC.destination);
+    const [st,en]=c.trim;src.start(0,st,en-st);await new Promise(r=>{src.onended=r;setTimeout(r,(en-st)*1000+400)});
+  }catch(e){}
+}
+async function playClip(slot){if(!S.settings.voice)return;const list=CLIPS.filter(c=>c.slot===slot);if(list.length)await playClipObj(pick(list))}
+let recState=null;
+function renderClips(){
+  document.querySelectorAll('.recblock').forEach(bl=>{const slot=bl.dataset.slot,list=CLIPS.filter(c=>c.slot===slot),box=bl.querySelector('.cliplist');box.innerHTML='';
+    list.forEach((c,i)=>{const el=document.createElement('span');el.className='clip';el.innerHTML=`🎙️ #${i+1} <button data-a="play">▶</button><button data-a="del">🗑</button>`;
+      el.querySelector('[data-a=play]').onclick=()=>playClipObj(c);
+      el.querySelector('[data-a=del]').onclick=async()=>{if(!confirm('Delete this recording?'))return;await VDB.del(c.id);await loadClips();renderClips()};box.appendChild(el)});
+    const btn=bl.querySelector('.recbtn'),mine=recState&&recState.slot===slot;
+    btn.disabled=(list.length>=3&&!mine)||(recState&&!mine);btn.classList.toggle('rec',!!mine);btn.textContent=mine?'■ Stop':list.length>=3?'Full (3 max)':'● Record'});
+}
+async function toggleRec(slot){
+  const msg=$('#recMsg');if(recState){stopRec();return}
+  if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia||!window.MediaRecorder){msg.textContent='Recording is not supported here. Make sure the iPhone is up to date and the game is opened in Safari.';return}
+  try{
+    audioInit();hush();
+    const stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true}});
+    const mime=['audio/mp4','audio/aac','audio/webm;codecs=opus','audio/webm'].find(m=>MediaRecorder.isTypeSupported&&MediaRecorder.isTypeSupported(m))||'';
+    const rec=new MediaRecorder(stream,mime?{mimeType:mime}:undefined),chunks=[];
+    rec.ondataavailable=e=>{if(e.data&&e.data.size)chunks.push(e.data)};
+    rec.onstop=async()=>{stream.getTracks().forEach(tk=>tk.stop());
+      try{const type=rec.mimeType||mime||'audio/mp4',data=await new Blob(chunks,{type}).arrayBuffer();const c={id:String(Date.now()),slot,mime:type,data};
+        await VDB.put(c);await loadClips();msg.textContent='Saved! This is how it will sound:';const saved=CLIPS.find(x=>x.id===c.id);recState=null;renderClips();if(saved)playClipObj(saved)}
+      catch(err){recState=null;renderClips();msg.textContent='Could not save the recording on this phone.'}};
+    rec.start();recState={slot,rec,timer:setTimeout(stopRec,5000)};msg.textContent='🔴 Recording… say it now! (stops by itself after 5 seconds)';renderClips();
+  }catch(err){recState=null;renderClips();msg.textContent='The microphone is blocked. Tap Allow when the iPhone asks, or turn on the microphone for Safari in Settings, then try again.'}
+}
+function stopRec(){if(!recState)return;clearTimeout(recState.timer);try{recState.rec.stop()}catch(e){recState=null;renderClips()}}
+document.querySelectorAll('.recbtn').forEach(b=>b.onclick=()=>toggleRec(b.closest('.recblock').dataset.slot));
+
+/* ---------- grown-up: progress page ---------- */
+function renderProgress(){
+  const st=S.stats,pct=(a,b)=>b?Math.round(a/b*100):0;
+  const names={math:'Math',count:'Counting',numbers:'Numbers',shapes:'Shapes & sizes',patterns:'Patterns',english:'English words',spanish:'Spanish words',letters:'Letters & sounds'};
+  const d=st.days[today()]||{q:0,ok:0,races:0},wk={q:0,ok:0,races:0};
+  for(let i=0;i<7;i++){const dt=new Date(Date.now()-i*864e5),k=`${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,'0')}-${String(dt.getDate()).padStart(2,'0')}`,r=st.days[k];if(r){wk.q+=r.q;wk.ok+=r.ok;wk.races+=r.races}}
+  let h=`<p class="pnote"><b>Today:</b> ${d.races} races, ${d.q} questions (${pct(d.ok,d.q)}% right on the first try)<br><b>Last 7 days:</b> ${wk.races} races, ${wk.q} questions (${pct(wk.ok,wk.q)}%)<br>
+    <b>Math level now:</b> up to ${mathMax()}${S.settings.math==='auto'?' (automatic)':''} · <b>Stickers:</b> ${S.stickers.length}/${STICKERS.length}</p>`;
+  const tops=Object.keys(names).filter(k=>st.topics[k]&&st.topics[k].n);
+  if(!tops.length)h+='<p class="pnote">No questions answered yet. Play a race and come back!</p>';
+  else{h+='<h3>Right on the first try</h3>';for(const k of tops){const tp=st.topics[k],p=pct(tp.ok,tp.n);h+=`<div class="prow"><span>${names[k]}</span><div class="pbar"><i style="width:${p}%"></i></div><span>${p}% of ${tp.n}</span></div>`}}
+  const items=Object.values(st.items).filter(i=>i.n>=2);
+  const learning=items.filter(i=>i.ok/i.n<.6).sort((a,b)=>a.ok/a.n-b.ok/b.n).slice(0,14);
+  const known=items.filter(i=>i.n>=3&&i.ok/i.n>=.8).sort((a,b)=>b.n-a.n).slice(0,18);
+  const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  if(learning.length)h+=`<h3>Still learning (comes up more often)</h3><div class="chips warn">${learning.map(i=>`<span>${esc(i.label)}</span>`).join('')}</div>`;
+  if(known.length)h+=`<h3>Knows well</h3><div class="chips">${known.map(i=>`<span>${esc(i.label)}</span>`).join('')}</div>`;
+  $('#progress').innerHTML=h;
+}
+function updateLimitInfo(){
+  const min=Math.round(S.play.ms/60000);let s=`This play session: ${S.play.races} races, ${min} min.`;
+  if(S.restUntil===-1)s+=' Resting now until a grown-up unlocks.';else if(S.restUntil>Date.now())s+=` Resting now for ${Math.ceil((S.restUntil-Date.now())/60000)} more min.`;
+  $('#limitInfo').textContent=s;
+}
 function openParent(){
   paused=true;hush();engineOff();touches.clear();
+  $('#kidName').value=S.settings.kidName||'';
+  document.querySelectorAll('[name=nameLang]').forEach(r=>r.checked=r.value===(S.settings.nameLang||'es'));
+  $('#limitSel').value=S.settings.limit||'off';$('#restSel').value=String(S.settings.restMin||30);$('#setMini').checked=!!S.settings.minigames;
+  renderProgress();updateLimitInfo();$('#recMsg').textContent='';loadClips().then(renderClips);
   $('#setSound').checked=S.settings.sound;$('#setVoice').checked=S.settings.voice;
   document.querySelectorAll('[name=lang]').forEach(r=>r.checked=r.value===L());
   document.querySelectorAll('[name=speed]').forEach(r=>r.checked=r.value===S.settings.speed);
@@ -767,6 +1233,9 @@ function openParent(){
   $('#parent').classList.add('on');
 }
 function readParent(){
+  S.settings.kidName=$('#kidName').value.trim().slice(0,20);
+  const nl=document.querySelector('[name=nameLang]:checked');if(nl)S.settings.nameLang=nl.value;
+  S.settings.limit=$('#limitSel').value;S.settings.restMin=+$('#restSel').value;S.settings.minigames=$('#setMini').checked;
   S.settings.sound=$('#setSound').checked;S.settings.voice=$('#setVoice').checked;
   document.querySelectorAll('[data-sub]').forEach(c=>S.settings.subjects[c.dataset.sub]=c.checked);
   const m=document.querySelector('[name=math]:checked');if(m)S.settings.math=m.value;
@@ -802,24 +1271,30 @@ $('#testEn').onclick=()=>{audioInit();testVoice('en')};
 $('#testEs').onclick=()=>{audioInit();testVoice('es')};
 $('#voiceEn').onchange=$('#voiceEs').onchange=e=>{badVoices.delete(e.target.value);saveBad();readParent()};
 document.querySelectorAll('[name=speed],[name=lang]').forEach(r=>r.onchange=()=>readParent());
-function closeParent(){readParent();$('#parent').classList.remove('on');paused=false;if(state==='race')engineOn()}
+function closeParent(){if(recState)stopRec();readParent();$('#parent').classList.remove('on');paused=false;if(state==='race')engineOn()}
 $('#pClose').onclick=closeParent;
 $('#pMap').onclick=()=>{closeParent();if(S.buddy==null)goBuddy();else goMap()};
-$('#pReset').onclick=()=>{if(confirm('Reset all progress and stickers?')){const keep=S.settings;S=clone(DEFAULTS);S.settings=keep;save();closeParent();goTitle()}};
+$('#pReset').onclick=()=>{if(confirm('Reset all progress, stickers, unlocked cars and the progress report? (Recordings and settings are kept.)')){const keep=S.settings;S=clone(DEFAULTS);S.settings=keep;newSession();save();closeParent();goTitle()}};
+$('#pUnlock').onclick=()=>{S.restUntil=0;newSession();save();updateLimitInfo();closeParent();if(S.buddy==null)goBuddy();else goMap()};
+$('#testName').onclick=()=>{audioInit();readParent();say(nm()?nameJoin(L()==='es'?'¡Muy bien':'Great job'):[[L()==='es'?'Escribe un nombre primero.':'Type a name first.']])};
+$('#limitSel').onchange=$('#restSel').onchange=()=>{readParent();updateLimitInfo()};
 
 /* ---------- title ---------- */
 function goTitle(){flowId++;state='title';hush();engineOff();setTheme(THEMES[0],false);show('title')}
-$('#playBtn').addEventListener('click',()=>{unlock();SFX.tap();if(S.buddy==null)goBuddy();else goMap()});
+$('#playBtn').addEventListener('click',()=>{unlock();SFX.tap();if(restActive()){goRest();return}if(S.buddy==null)goBuddy();else goMap()});
 document.querySelectorAll('.lp').forEach(b=>b.addEventListener('click',()=>{unlock();S.settings.lang=b.dataset.lang;save();applyLang();SFX.tap();say(tr('hello'))}));
 onTap($('#bookBtn'),()=>{SFX.tap();goBook()});
 onTap($('#bookBack'),()=>{SFX.tap();goMap()});
+onTap($('#garageBtn'),()=>{SFX.tap();goGarage()});
+onTap($('#garageBack'),()=>{SFX.tap();goMap()});
 onTap($('#changeBuddy'),()=>{SFX.tap();goBuddy()});
-document.addEventListener('visibilitychange',()=>{if(document.hidden){hush();engineOff();touches.clear()}else if(state==='race'&&!paused){audioInit();engineOn()}});
-
-(function makeIcon(){try{const c=document.createElement('canvas');c.width=c.height=180;const x=c.getContext('2d');const g=x.createLinearGradient(0,0,0,180);g.addColorStop(0,'#5fc0ff');g.addColorStop(.62,'#c9efff');g.addColorStop(.62,'#7ccf5a');g.addColorStop(1,'#5fb546');x.fillStyle=g;x.fillRect(0,0,180,180);
-  x.font='118px "Apple Color Emoji","Segoe UI Emoji",sans-serif';x.textAlign='center';x.textBaseline='middle';x.fillText('🚗',90,104);$('#touchIcon').href=c.toDataURL('image/png')}catch(e){}})();
+document.addEventListener('visibilitychange',()=>{if(document.hidden){hush();engineOff();touches.clear();save()}else if(state==='race'&&!paused){audioInit();engineOn()}});
 
 applyLang();resize();setTheme(THEMES[0],false);requestAnimationFrame(frame);
+loadClips();
+if(restActive()){goRest()}
+// Offline: keep a copy of the game on the phone
+if('serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='localhost'))navigator.serviceWorker.register('sw.js').catch(()=>{});
 </script>
 </body>
 </html>
