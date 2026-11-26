@@ -107,8 +107,28 @@ canvas{display:block}
 .slot{aspect-ratio:1;border-radius:20px;background:#f2f0ff;display:flex;align-items:center;justify-content:center;font-size:min(9vmin,54px)}
 .slot.empty{color:#d6cff7;font-weight:900;font-size:min(6vmin,34px)}
 /* parent */
-#pcorner{position:fixed;left:0;top:0;width:calc(76px + env(safe-area-inset-left));height:calc(76px + env(safe-area-inset-top));z-index:150;display:flex;align-items:center;justify-content:center;padding-left:env(safe-area-inset-left);padding-top:env(safe-area-inset-top)}
-#pcorner svg{width:46px;height:46px;transform:rotate(-90deg);opacity:0;transition:opacity .2s}
+#pcorner{position:fixed;left:0;top:0;z-index:150;display:flex;align-items:center;gap:8px;min-width:calc(76px + env(safe-area-inset-left));min-height:calc(72px + env(safe-area-inset-top));
+  padding:calc(12px + env(safe-area-inset-top)) 14px 12px calc(16px + env(safe-area-inset-left))}
+#pcorner svg{position:absolute;left:calc(8px + env(safe-area-inset-left));top:calc(7px + env(safe-area-inset-top));width:46px;height:46px;transform:rotate(-90deg);opacity:0;transition:opacity .2s;pointer-events:none}
+#pcorner .gearIco{position:relative;font-size:30px;line-height:36px;opacity:.85;filter:drop-shadow(0 1px 2px rgba(0,0,0,.4));pointer-events:none}
+#pcorner .gearLbl{display:none;position:relative;font:700 15px system-ui,sans-serif;color:#fff;background:rgba(0,0,0,.3);padding:6px 11px;border-radius:99px;pointer-events:none}
+body.ontitle #pcorner .gearLbl,body.onmap #pcorner .gearLbl{display:inline-block}
+body.racing #pcorner .gearIco{opacity:0}
+/* grown-ups-only check */
+#gate{position:fixed;inset:0;z-index:210;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;padding:10px}
+#gate.on{display:flex}
+.gatecard{background:#fff;border-radius:20px;padding:14px 18px 16px;width:min(94vw,480px);max-height:96vh;overflow:auto;font-family:system-ui,sans-serif;color:#222;position:relative;text-align:center}
+.gatecard h2{margin:0 0 4px;font-size:19px}
+.gtxt{font-size:15px;margin:2px 0 4px;color:#444}
+.gtxt b{display:block;font-size:22px;color:#2b6fd6;margin-top:2px}
+.gtxt small{color:#888;font-size:14px}
+#gateDots{font-size:22px;letter-spacing:8px;color:#2b8ce0;min-height:26px}
+#gatePad{display:grid;grid-template-columns:repeat(auto-fill,minmax(56px,1fr));gap:8px;max-width:360px;margin:4px auto 0}
+#gatePad button{font:700 24px system-ui,sans-serif;padding:9px 0;border-radius:12px;border:1px solid #cfd9ff;background:#f4f7ff;color:#222}
+#gatePad button:active{background:#d8e4ff}
+.gx{position:absolute;right:10px;top:8px;border:none;background:#eee;border-radius:99px;width:38px;height:38px;font-size:18px}
+.gatecard.shake{animation:wiggle .45s}
+.ver{position:fixed;right:max(10px,env(safe-area-inset-right));bottom:max(6px,env(safe-area-inset-bottom));font:600 11px system-ui;color:rgba(255,255,255,.75)}
 #pcorner circle{fill:rgba(255,255,255,.35);stroke:#fff;stroke-width:5;stroke-dasharray:113.1;stroke-dashoffset:113.1}
 #pcorner.holding svg{opacity:1}
 #pcorner.holding circle{stroke-dashoffset:0;transition:stroke-dashoffset 3s linear}
@@ -211,7 +231,7 @@ canvas{display:block}
 <body>
 <canvas id="game"></canvas>
 <canvas id="fx"></canvas>
-<div id="pcorner"><svg viewBox="0 0 44 44"><circle cx="22" cy="22" r="18"/></svg></div>
+<div id="pcorner"><svg viewBox="0 0 44 44"><circle cx="22" cy="22" r="18"/></svg><span class="gearIco">⚙️</span><span class="gearLbl" data-t="grownBtn"></span></div>
 
 <div id="title" class="screen on">
   <div class="logo"><span class="l1">Beep Beep</span><span class="l2">Buddies</span></div>
@@ -219,6 +239,7 @@ canvas{display:block}
   <button id="playBtn" class="btn green huge">▶</button>
   <div class="langpick"><button class="lp" data-lang="en">🇺🇸 English</button><button class="lp" data-lang="es">🇲🇽 Español</button></div>
   <div class="grownup" data-t="grown"></div>
+  <div class="ver" id="verLbl"></div>
 </div>
 
 <div id="buddy" class="screen"><div class="htitle" data-t="pick"></div><div id="buddyGrid" class="grid6"></div></div>
@@ -275,9 +296,19 @@ canvas{display:block}
   </div>
 </div>
 
+<div id="gate">
+  <div class="gatecard">
+    <button id="gateClose" class="gx">✕</button>
+    <h2>Grown-ups only · Solo adultos</h2>
+    <p class="gtxt">Tap these numbers in order · Toca estos números en orden<b id="gateWords"></b></p>
+    <div id="gateDots"></div>
+    <div id="gatePad"></div>
+  </div>
+</div>
+
 <div id="parent">
   <div class="pcard">
-    <h2>Grown-up settings</h2>
+    <h2>Grown-up settings <span id="verSet" style="font-size:13px;color:#999;font-weight:500"></span></h2>
     <details open><summary>👦 Child &amp; language</summary>
       <div class="frow"><span>Child's name</span><input type="text" id="kidName" placeholder="e.g. Jorgito" maxlength="20" autocomplete="off" autocapitalize="words"></div>
       <div class="frow"><span>Say name in</span><label><input type="radio" name="nameLang" value="es"> Spanish</label><label><input type="radio" name="nameLang" value="en"> English</label><button id="testName" class="tbtn">▶ Test</button></div>
@@ -361,12 +392,12 @@ function onTap(el,fn){el.addEventListener('pointerup',e=>{e.preventDefault();e.s
 /* ---------- data ---------- */
 const BUDDIES=[{e:'🐶',c:'#ff5a5a',name:'Puppy',es:'Perrito'},{e:'🐱',c:'#ffa41b',name:'Kitty',es:'Gatito'},{e:'🦖',c:'#22c065',name:'Dino',es:'Dino'},{e:'🐰',c:'#ff6fcf',name:'Bunny',es:'Conejito'},{e:'🐻',c:'#3d9bff',name:'Bear',es:'Osito'},{e:'🐸',c:'#9b5cff',name:'Froggy',es:'Ranita'}];
 const T={
- en:{grown:'Grown-ups: hold the top-left corner for 3 seconds to open settings',pick:'Pick a buddy!',pickSay:'Pick your buddy!',where:'Where should we drive?',
+ en:{grownBtn:'Grown-ups',grown:'Grown-ups: tap ⚙️ (top-left) for settings: name, family voice, language, play time',pick:'Pick a buddy!',pickSay:'Pick your buddy!',where:'Where should we drive?',
    ready:[['Ready…','en'],['set…','en'],['go!','en']],did:'You did it! 🎉',didSay:n=>`You did it! You got ${n} ${n===1?'star':'stars'}!`,
    countTog:"Let's count together!",lookTog:"Let's look together!",newStk:'New sticker!',newStkSay:'You got a new sticker!',stkSay:'You got a sticker!',
    myStk:'My Stickers',haveStk:n=>`You have ${n} ${n===1?'sticker':'stickers'}!`,noStk:'Finish a road to get stickers!',bouncy:"Let's try the bouncy one first!",
    beep:'Beep beep!',hello:'Hello! Let’s play!',tags:{math:'Math',count:'Counting',english:'English',spanish:'Spanish',letters:'Letters'}},
- es:{grown:'Adultos: mantengan presionada la esquina de arriba a la izquierda 3 segundos para abrir los ajustes',pick:'¡Escoge un amigo!',pickSay:'¡Escoge tu amigo!',where:'¿A dónde vamos?',
+ es:{grownBtn:'Adultos',grown:'Adultos: toquen ⚙️ (arriba a la izquierda) para los ajustes: nombre, voz de la familia, idioma, tiempo de juego',pick:'¡Escoge un amigo!',pickSay:'¡Escoge tu amigo!',where:'¿A dónde vamos?',
    ready:[['En sus marcas…','es'],['listos…','es'],['¡fuera!','es']],did:'¡Lo lograste! 🎉',didSay:n=>`¡Lo lograste! ¡Ganaste ${n} ${n===1?'estrella':'estrellas'}!`,
    countTog:'¡Vamos a contar juntos!',lookTog:'¡Vamos a ver juntos!',newStk:'¡Estampa nueva!',newStkSay:'¡Ganaste una estampa nueva!',stkSay:'¡Ganaste una estampa!',
    myStk:'Mis estampas',haveStk:n=>`¡Tienes ${n} ${n===1?'estampa':'estampas'}!`,noStk:'¡Termina un camino para ganar estampas!',bouncy:'¡Primero el que está brincando!',
@@ -775,7 +806,8 @@ let last=performance.now();
 function frame(now){const dt=Math.min(.05,(now-last)/1000);last=now;update(dt);render();updFx(dt);requestAnimationFrame(frame)}
 
 /* ---------- screens & flow ---------- */
-function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('on',s.id===id))}
+function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('on',s.id===id));
+  const bc=document.body.classList;bc.toggle('racing',id==='hud');bc.toggle('ontitle',id==='title');bc.toggle('onmap',id==='map')}
 function setTheme(th,items){theme=th;buildRoad(th,items);pos=0;lastSeg=-1}
 
 function goBuddy(){
@@ -1142,9 +1174,29 @@ function goBook(){
 }
 
 /* ---------- parent menu ---------- */
-const pc=$('#pcorner');let holdT=null;
-pc.addEventListener('pointerdown',e=>{e.stopPropagation();pc.classList.add('holding');clearTimeout(holdT);holdT=setTimeout(()=>{pc.classList.remove('holding');openParent()},3000)});
-for(const ev of ['pointerup','pointercancel','pointerleave'])pc.addEventListener(ev,()=>{clearTimeout(holdT);pc.classList.remove('holding')});
+// ⚙️ top-left: a quick tap opens the grown-ups check; holding 3 seconds opens settings directly
+const pc=$('#pcorner');let holdT=null,downAt=0;
+const menuOpen=()=>$('#parent').classList.contains('on')||$('#gate').classList.contains('on');
+pc.addEventListener('pointerdown',e=>{e.stopPropagation();e.preventDefault();downAt=Date.now();pc.classList.add('holding');clearTimeout(holdT);
+  holdT=setTimeout(()=>{pc.classList.remove('holding');downAt=0;if(!$('#parent').classList.contains('on')){$('#gate').classList.remove('on');openParent()}},3000)});
+pc.addEventListener('pointerup',e=>{e.stopPropagation();const quick=downAt&&Date.now()-downAt<800;clearTimeout(holdT);pc.classList.remove('holding');downAt=0;
+  if(quick&&state!=='race'&&!menuOpen())openGate()});
+for(const ev of ['pointercancel','pointerleave'])pc.addEventListener(ev,()=>{clearTimeout(holdT);pc.classList.remove('holding')});
+// Grown-ups check: tap 3 numbers that are written as words (a child who can't read can't pass it)
+let gateSeq=[],gatePos=0;
+function gateDots(){$('#gateDots').textContent='●'.repeat(gatePos)+'○'.repeat(gateSeq.length-gatePos)}
+function openGate(){
+  paused=true;hush();engineOff();touches.clear();
+  gateSeq=shuffle([1,2,3,4,5,6,7,8,9]).slice(0,3);gatePos=0;
+  $('#gateWords').innerHTML=`${gateSeq.map(n=>NUMS.en[n]).join(' · ')}<br><small>${gateSeq.map(n=>NUMS.es[n]).join(' · ')}</small>`;gateDots();
+  const pad=$('#gatePad');pad.innerHTML='';
+  for(let n=1;n<=9;n++){const b=document.createElement('button');b.textContent=n;b.onclick=()=>{
+    if(n===gateSeq[gatePos]){gatePos++;gateDots();if(gatePos===gateSeq.length){$('#gate').classList.remove('on');openParent()}}
+    else{gatePos=0;gateDots();const c=$('.gatecard');c.classList.remove('shake');void c.offsetWidth;c.classList.add('shake')}};pad.appendChild(b)}
+  $('#gate').classList.add('on');
+}
+function closeGate(){$('#gate').classList.remove('on');if(!$('#parent').classList.contains('on')){paused=false;if(state==='race')engineOn()}}
+$('#gateClose').onclick=closeGate;
 /* ---------- family voice: grown-ups record "¡Eso es!" etc. — saved only on this phone ---------- */
 const VDB={db:null,
   open(){if(this.db)return Promise.resolve(this.db);return new Promise((res,rej)=>{if(!window.indexedDB){rej(new Error('no storage'));return}
@@ -1290,7 +1342,8 @@ onTap($('#garageBack'),()=>{SFX.tap();goMap()});
 onTap($('#changeBuddy'),()=>{SFX.tap();goBuddy()});
 document.addEventListener('visibilitychange',()=>{if(document.hidden){hush();engineOff();touches.clear();save()}else if(state==='race'&&!paused){audioInit();engineOn()}});
 
-applyLang();resize();setTheme(THEMES[0],false);requestAnimationFrame(frame);
+const VERSION='v5';$('#verLbl').textContent=VERSION;$('#verSet').textContent='· '+VERSION;
+applyLang();resize();setTheme(THEMES[0],false);show('title');requestAnimationFrame(frame);
 loadClips();
 if(restActive()){goRest()}
 // Offline: keep a copy of the game on the phone
