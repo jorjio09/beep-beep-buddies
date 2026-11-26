@@ -199,6 +199,7 @@ canvas{position:fixed;inset:0;width:100%;height:100%;display:block}
     <h3>Voices</h3>
     <div class="vrow"><span>English</span><select id="voiceEn"></select><button id="testEn" class="tbtn">▶ Test</button></div>
     <div class="vrow"><span>Español</span><select id="voiceEs"></select><button id="testEs" class="tbtn">▶ Test</button></div>
+    <div id="voiceMsg" style="color:#c00;font-size:14px;line-height:1.35"></div>
     <div class="ptip"><b>Want a more natural voice?</b> On the iPhone go to Settings → Accessibility → Spoken Content (called <i>Read &amp; Speak</i> on some newer iPhones) → Voices. Under <b>English</b> download <b>Ava (Premium)</b> or <b>Samantha (Enhanced)</b>. Under <b>Spanish</b> download <b>Paulina (Enhanced)</b> or <b>Mónica (Enhanced)</b>. Then close and reopen the game and pick them above. The best voices are listed first.</div>
     <h3>Learning topics</h3>
     <label><input type="checkbox" data-sub="math"> Math (+ and −)</label>
@@ -323,33 +324,61 @@ function voiceScore(v,lang){
   if(BAD_VOICES.test(n))s-=200;
   return s;
 }
-function voiceList(lang){if(!synth)return [];return synth.getVoices().filter(v=>v.lang.toLowerCase().startsWith(lang)).sort((a,b)=>voiceScore(b,lang)-voiceScore(a,lang))}
+// Voices that were tried on this phone and made no sound (e.g. listed by Safari but not downloaded)
+const BAD_KEY='beepbeep_badvoices';
+let badVoices=new Set((()=>{try{return JSON.parse(localStorage.getItem(BAD_KEY))||[]}catch(e){return []}})());
+function saveBad(){try{localStorage.setItem(BAD_KEY,JSON.stringify([...badVoices]))}catch(e){}}
+function voiceList(lang,includeBad=false){if(!synth)return [];return synth.getVoices().filter(v=>v.lang.toLowerCase().startsWith(lang)&&(includeBad||!badVoices.has(v.name))).sort((a,b)=>voiceScore(b,lang)-voiceScore(a,lang))}
 function loadVoices(){
   if(!synth)return;
-  for(const lang of ['en','es']){const list=voiceList(lang);const want=S.settings.voiceName[lang];voices[lang]=(want&&list.find(v=>v.name===want))||list[0]||null}
+  // Automatic choice sticks to voices that ship with every phone; Premium/Enhanced only when a grown-up picks one
+  for(const lang of ['en','es']){const list=voiceList(lang);const want=S.settings.voiceName[lang];
+    const safe=list.filter(v=>!/premium|enhanced|mejorada|siri/i.test(v.name));
+    voices[lang]=(want&&list.find(v=>v.name===want))||safe[0]||list[0]||null}
   if($('#parent').classList.contains('on'))fillVoiceMenus();
 }
 loadVoices();if(synth&&'onvoiceschanged' in synth)synth.onvoiceschanged=loadVoices;
 const RATES={vslow:.62,slow:.75,normal:.9};
 let speakTok=0;
-function sayOne(text,lang){
+const liveU=[]; // keep utterances referenced so Safari doesn't garbage-collect them mid-sentence
+// Speak once with a specific voice (or the phone's default when voice is null).
+// Resolves true if it really spoke, false if the voice stayed silent or failed.
+function speakRaw(text,lang,voice){
   return new Promise(res=>{
-    if(!synth||!S.settings.voice){setTimeout(res,Math.min(1800,350+text.length*55));return}
-    if(!voices[lang])loadVoices();
     const u=new SpeechSynthesisUtterance(text);u.lang=lang==='es'?'es-MX':'en-US';
-    const v=voices[lang];if(v){u.voice=v;u.lang=v.lang}
+    if(voice){u.voice=voice;u.lang=voice.lang}
     u.rate=RATES[S.settings.speed]||.75;u.pitch=1.05;u.volume=1;
-    let done=false;const fin=()=>{if(!done){done=true;res()}};
-    u.onend=fin;u.onerror=fin;setTimeout(fin,2000+text.length*170);
-    window.__u=u;if(synth.paused)synth.resume();synth.speak(u);
+    let started=false,done=false;const t0=performance.now();
+    const fin=ok=>{if(done)return;done=true;clearTimeout(st);clearTimeout(to);const i=liveU.indexOf(u);if(i>=0)liveU.splice(i,1);res(ok)};
+    u.onstart=()=>{started=true};
+    u.onend=()=>{const took=performance.now()-t0;fin(took>Math.min(350,60+text.length*15))}; // ended instantly = silent voice
+    u.onerror=e=>fin(e&&(e.error==='interrupted'||e.error==='canceled'));
+    const st=setTimeout(()=>{if(!started&&!synth.speaking)fin(false);else started=true},2200);
+    const to=setTimeout(()=>fin(true),2500+text.length*220);
+    liveU.push(u);if(synth.paused)synth.resume();synth.speak(u);
   });
+}
+async function sayOne(text,lang,tok){
+  if(!synth||!S.settings.voice){await sleep(Math.min(1800,350+text.length*55));return}
+  if(!voices[lang])loadVoices();
+  const marked=[];
+  for(let attempt=0;attempt<3;attempt++){
+    if(tok!==undefined&&tok!==speakTok)return;
+    const v=attempt<2?voices[lang]:null;
+    if(await speakRaw(text,lang,v))return;
+    if(tok!==undefined&&tok!==speakTok)return;
+    if(v){badVoices.add(v.name);marked.push(v.name);saveBad();loadVoices()}
+    if(synth.speaking||synth.pending){synth.cancel();await sleep(150)}
+  }
+  // even the phone's default voice was silent: the problem isn't the voices, so forget what we marked
+  marked.forEach(n=>badVoices.delete(n));saveBad();loadVoices();
 }
 // list: string (spoken in the game language), or array of [text, lang]; short pause between phrases
 async function say(list,interrupt=true){
   if(typeof list==='string')list=[[list,L()]];
-  if(interrupt){speakTok++;if(synth)synth.cancel()}
+  if(interrupt){speakTok++;if(synth&&(synth.speaking||synth.pending)){synth.cancel();await sleep(150)}} // iPhone drops speech started right after a stop
   const tok=speakTok;
-  for(let i=0;i<list.length;i++){const [t,l]=list[i];if(tok!==speakTok)return;await sayOne(t,l||L());if(i<list.length-1)await sleep(220)}
+  for(let i=0;i<list.length;i++){const [t,l]=list[i];if(tok!==speakTok)return;await sayOne(t,l||L(),tok);if(i<list.length-1)await sleep(220)}
 }
 function hush(){speakTok++;if(synth)synth.cancel()}
 let unlockedSpeech=false;
@@ -598,14 +627,18 @@ async function countAlong(vis,q){
   if(!q.dead)await say([[lg==='es'?(k===1?'¡Es uno!':`¡Son ${NUMS.es[k]}!`):`That's ${NUMS.en[k]}!`,lg]],false);
 }
 // Every spoken line is a list of short phrases [text, lang?]; lang defaults to the game language.
+// "2 galletas" / "una galleta" / "1 cookie" — says the number with the thing's name
+function qty(n,it,lang){const [,one,many,esOne,esMany,fem]=it;
+  if(lang==='es')return n===1?`${fem?'una':'un'} ${esOne}`:`${n} ${esMany}`;
+  return `${n} ${n===1?one:many}`}
 function makeAdd(){
   const max=mathMax();let a,b;do{a=ri(1,max===5?3:6);b=ri(1,max===5?3:5)}while(a+b>max);
-  const [e]=fresh(COUNT_ITEMS,x=>x[0]),n=a+b,fs=itemSize(a+b,2),es=L()==='es';
+  const it=fresh(COUNT_ITEMS,x=>x[0]),e=it[0],n=a+b,fs=itemSize(a+b,2),lg=L(),es=lg==='es',Q=k=>qty(k,it,lg);
   return {tag:'math',math:true,
     visual:`<div class="eq" style="font-size:${fs}px"><div class="grp">${items(e,a)}</div><div class="op">+</div><div class="grp">${items(e,b)}</div></div><div class="numline">${a} + ${b} = ?</div>`,
     answers:numAnswers(n,0,10),
-    prompt:es?[['¿Cuánto es'],[`${a} más ${b}?`]]:[['What is'],[`${a} plus ${b}?`]],
-    praise:es?[['¡Sí!'],[`${a} más ${b} son ${n}.`]]:[['Yes!'],[`${a} plus ${b} is ${n}.`]],
+    prompt:es?[['¿Cuánto es'],[`${Q(a)} más ${Q(b)}?`]]:[['What is'],[`${Q(a)} plus ${Q(b)}?`]],
+    praise:es?[['¡Sí!'],[`${Q(a)} más ${Q(b)}`],[`son ${Q(n)}.`]]:[['Yes!'],[`${Q(a)} plus ${Q(b)}`],[`is ${Q(n)}.`]],
     teach(vis){return countAlong(vis,this)}};
 }
 function makeSub(){
@@ -615,7 +648,8 @@ function makeSub(){
     answers:numAnswers(n,0,10),
     prompt:es?[[`${a} ${esMany}.`],[b===1?(fem?'Se va una.':'Se va uno.'):`Se van ${b}.`],[fem?'¿Cuántas quedan?':'¿Cuántos quedan?']]
              :[[`${a} ${many}.`],[`${b} ${b===1?'goes':'go'} away.`],['How many are left?']],
-    praise:es?[['¡Sí!'],[`${a} menos ${b} ${n===1?'es':'son'} ${n}.`]]:[['Yes!'],[`${a} take away ${b} is ${n}.`]],
+    praise:es?[['¡Sí!'],[`${a} menos ${b} ${n===1?'es':'son'} ${n}.`],[`${n===1?'Queda':'Quedan'} ${qty(n,COUNT_ITEMS.find(x=>x[0]===e),'es')}.`]]
+             :[['Yes!'],[`${a} take away ${b} is ${n}.`],[`${qty(n,COUNT_ITEMS.find(x=>x[0]===e),'en')} ${n===1?'is':'are'} left.`]],
     onShow(vis){setTimeout(()=>vis.querySelectorAll('.leaving').forEach(el=>el.classList.add('away')),1300)},
     teach(vis){vis.querySelectorAll('.leaving').forEach(el=>el.classList.add('away'));return countAlong(vis,this)}};
 }
@@ -679,6 +713,7 @@ function askOne(q,i,total,my){
     q.answers.forEach(a=>{const b=document.createElement('button');b.className='btn ans';b.innerHTML=a.html;a.el=b;ans.appendChild(b);
       onTap(b,async()=>{
         if(locked||q.dead)return;
+        q.poke();
         if(a.ok){q.dead=true;hush();b.classList.remove('hint');b.classList.add('right');ans.classList.add('solved');SFX.yay();confetti(90);
           await say(q.praise);await sleep(400);resolve();return}
         wiggle(b);SFX.soft();if(teaching)return;teaching=true;
@@ -687,10 +722,15 @@ function askOne(q,i,total,my){
     });
     if(q.onShow)q.onShow(vis);
     setTimeout(()=>locked=false,700);
-    sleep(400).then(()=>{if(!q.dead&&my===flowId)say(q.prompt)});
+    let lastAct=Date.now(),repeats=0;q.poke=()=>{lastAct=Date.now()};
+    const ask=()=>{if(!q.dead&&my===flowId){lastAct=Date.now();say(q.prompt)}};
+    sleep(600).then(ask);
+    // nobody tapped for a while? ask again (up to 3 times)
+    const nag=setInterval(()=>{if(q.dead||my!==flowId){clearInterval(nag);return}
+      if(!paused&&!teaching&&!(synth&&synth.speaking)&&Date.now()-lastAct>11000&&repeats<3){repeats++;ask();const sp=$('#qSpeak');wiggle(sp)}},1000);
   });
 }
-onTap($('#qSpeak'),()=>{if(curQ&&!curQ.dead){SFX.tap();say(curQ.prompt)}});
+onTap($('#qSpeak'),()=>{if(curQ&&!curQ.dead){unlock();SFX.tap();if(curQ.poke)curQ.poke();say(curQ.prompt)}});
 
 function giveSticker(my){
   return new Promise(resolve=>{
@@ -738,20 +778,29 @@ function readParent(){
 }
 function fillVoiceMenus(){
   for(const [lang,id] of [['en','#voiceEn'],['es','#voiceEs']]){
-    const sel=$(id),list=voiceList(lang),cur=voices[lang]?voices[lang].name:'';sel.innerHTML='';
+    const sel=$(id),good=voiceList(lang),list=[...good,...voiceList(lang,true).filter(v=>badVoices.has(v.name))],cur=voices[lang]?voices[lang].name:'';sel.innerHTML='';
     if(!list.length){const o=document.createElement('option');o.value='';o.textContent='(no voices found)';sel.appendChild(o);continue}
-    list.forEach((v,i)=>{const o=document.createElement('option');o.value=v.name;o.textContent=v.name+' · '+v.lang+(i===0?'  ★ best':'');sel.appendChild(o)});
+    list.forEach((v,i)=>{const o=document.createElement('option');o.value=v.name;o.textContent=v.name+' · '+v.lang+(i===0&&good.length?'  ★ best':'')+(badVoices.has(v.name)?'  (no sound)':'');sel.appendChild(o)});
     sel.value=cur||list[0].name;
   }
 }
-function testVoice(lang){
-  readParent();
-  const line=lang==='es'?[['¡Hola!','es'],['¿Cuánto es','es'],['dos más uno?','es']]:[['Hi there!','en'],['What is','en'],['two plus one?','en']];
-  const was=S.settings.voice;S.settings.voice=true;say(line);S.settings.voice=was;
+// Test exactly the voice picked in the menu and say on screen whether it made sound
+async function testVoice(lang){
+  const sel=$(lang==='es'?'#voiceEs':'#voiceEn'),btn=$(lang==='es'?'#testEs':'#testEn');
+  if(!synth){btn.textContent='✗ No voice';return}
+  const v=voiceList(lang,true).find(x=>x.name===sel.value)||null;
+  speakTok++;if(synth.speaking||synth.pending){synth.cancel();await sleep(150)}
+  btn.textContent='…';
+  const ok=await speakRaw(lang==='es'?'¡Hola! ¿Cuánto es dos más uno?':'Hi there! What is two plus one?',lang,v);
+  if(v){if(ok)badVoices.delete(v.name);else badVoices.add(v.name);saveBad()}
+  btn.textContent=ok?'✓ Works':'✗ Silent';
+  if(!ok){$('#voiceMsg').textContent=`"${v?v.name:'Default'}" made no sound — it's probably not downloaded on this phone. Pick another voice and test again.`}
+  else{$('#voiceMsg').textContent='';readParent()}
+  setTimeout(()=>btn.textContent='▶ Test',4000);
 }
 $('#testEn').onclick=()=>{audioInit();testVoice('en')};
 $('#testEs').onclick=()=>{audioInit();testVoice('es')};
-$('#voiceEn').onchange=$('#voiceEs').onchange=()=>readParent();
+$('#voiceEn').onchange=$('#voiceEs').onchange=e=>{badVoices.delete(e.target.value);saveBad();readParent()};
 document.querySelectorAll('[name=speed],[name=lang]').forEach(r=>r.onchange=()=>readParent());
 function closeParent(){readParent();$('#parent').classList.remove('on');paused=false;if(state==='race')engineOn()}
 $('#pClose').onclick=closeParent;
