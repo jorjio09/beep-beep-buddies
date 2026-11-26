@@ -947,9 +947,11 @@ function runMini(my){const kinds=['wash','gas','park'];const k=kinds[(S.miniIdx+
 function nagger(my,getLast,lines,isDone){const iv=setInterval(()=>{if(my!==flowId||isDone()){clearInterval(iv);return}if(paused)return;if(Date.now()-getLast()>10000){say(lines);getLast(true)}},1000);return iv}
 // Car wash: rub the mud off with a finger
 function miniWash(my){return new Promise(resolve=>{
-  const area=miniOpen('wash',tr('washSay'));const r=area.getBoundingClientRect(),Wd=r.width,Hd=r.height;
-  const mk=()=>{const c=document.createElement('canvas');c.width=Math.round(Wd*DPR);c.height=Math.round(Hd*DPR);area.appendChild(c);const x=c.getContext('2d');x.scale(DPR,DPR);return [c,x]};
-  const [,cx]=mk(),[mc,mx]=mk();
+  // clientWidth/Height = real layout size (the card is still zooming in when this runs, so
+  // getBoundingClientRect would report a smaller, shrunken size and the finger would miss the mud)
+  const area=miniOpen('wash',tr('washSay'));const Wd=area.clientWidth,Hd=area.clientHeight;
+  const mk=d=>{const c=document.createElement('canvas');c.width=Math.round(Wd*d);c.height=Math.round(Hd*d);area.appendChild(c);const x=c.getContext('2d');x.scale(d,d);return [c,x]};
+  const [,cx]=mk(DPR),[mc,mx]=mk(1); // mud layer at 1x: plenty sharp, and fast to check
   cx.fillStyle='#bfe9ff';cx.fillRect(0,0,Wd,Hd);cx.fillStyle='#8fd0f2';cx.fillRect(0,Hd*.8,Wd,Hd*.2);
   for(let i=0;i<14;i++){cx.fillStyle='rgba(255,255,255,.6)';cx.beginPath();cx.arc(rand(0,Wd),rand(0,Hd*.75),rand(6,18),0,7);cx.fill()}
   const b=buddy(),st=carStyle(),w=Math.min(Wd*.5,Hd*.9/(st==='monster'?1.4:.9)),base=Hd*.95;
@@ -959,20 +961,25 @@ function miniWash(my){return new Promise(resolve=>{
   for(let i=0;i<34;i++){const x=Wd/2+rand(-.5,.5)*w,y=rand(top,base-w*.05),R=rand(.06,.12)*w;mx.globalAlpha=rand(.85,1);mx.beginPath();mx.arc(x,y,R,0,7);mx.fill();
     for(let k=0;k<2;k++){mx.beginPath();mx.arc(x+rand(-R,R),y+rand(-R,R),R*rand(.3,.6),0,7);mx.fill()}}
   mx.globalAlpha=1;
-  const sample=()=>{const d=mx.getImageData(0,0,mc.width,mc.height).data,step=Math.max(4,Math.round(10*DPR));let n=0;for(let y=0;y<mc.height;y+=step)for(let x=0;x<mc.width;x+=step)if(d[(y*mc.width+x)*4+3]>40)n++;return n};
-  const total=sample()||1;let done=false,lastRub=Date.now(),scrubT=0,down=false;
-  mx.globalCompositeOperation='destination-out';
-  const rub=e=>{if(done)return;const rc=mc.getBoundingClientRect(),x=e.clientX-rc.left,y=e.clientY-rc.top;mx.beginPath();mx.arc(x,y,w*.1,0,7);mx.fill();lastRub=Date.now();
+  const sample=()=>{const d=mx.getImageData(0,0,mc.width,mc.height).data,step=6;let n=0;for(let y=0;y<mc.height;y+=step)for(let x=0;x<mc.width;x+=step)if(d[(y*mc.width+x)*4+3]>40)n++;return n};
+  const total=sample()||1;let done=false,lastRub=Date.now(),scrubT=0,down=false,lastPt=null;
+  mx.globalCompositeOperation='destination-out';mx.lineCap='round';mx.lineJoin='round';
+  const R=Math.max(26,w*.14); // a big "sponge" for little fingers
+  const rub=e=>{if(done)return;const rc=mc.getBoundingClientRect();
+    const x=(e.clientX-rc.left)*Wd/rc.width,y=(e.clientY-rc.top)*Hd/rc.height; // map finger to the mud layer even mid-zoom
+    mx.beginPath();if(lastPt){mx.lineWidth=R*2;mx.moveTo(lastPt[0],lastPt[1]);mx.lineTo(x,y);mx.stroke()}else{mx.arc(x,y,R,0,7);mx.fill()} // fast swipes leave no gaps
+    lastPt=[x,y];lastRub=Date.now();
     if(Math.random()<.35)parts.push({k:'e',e:'🫧',x:e.clientX+rand(-20,20),y:e.clientY+rand(-20,20),vx:rand(-40,40),vy:rand(-160,-60),r:0,vr:rand(-2,2),size:rand(18,34),life:rand(.6,1),g:-40});
     if(Date.now()-scrubT>90){scrubT=Date.now();tone(rand(700,1100),.05,{type:'triangle',vol:.05})}};
-  mc.addEventListener('pointerdown',e=>{down=true;try{mc.setPointerCapture(e.pointerId)}catch(_){}rub(e)});
+  mc.addEventListener('pointerdown',e=>{down=true;lastPt=null;try{mc.setPointerCapture(e.pointerId)}catch(_){}rub(e)});
   mc.addEventListener('pointermove',e=>{if(down)rub(e)});
-  for(const ev of ['pointerup','pointercancel'])mc.addEventListener(ev,()=>down=false);
+  for(const ev of ['pointerup','pointercancel'])mc.addEventListener(ev,()=>{down=false;lastPt=null});
   say(tr('washSay'));
   nagger(my,(reset)=>reset?(lastRub=Date.now()):lastRub,tr('washHint'),()=>done);
-  const iv=setInterval(async()=>{if(my!==flowId){clearInterval(iv);return}if(paused||done)return;
-    if(sample()<=total*.12){done=true;clearInterval(iv);mx.clearRect(0,0,Wd,Hd);const rc=mc.getBoundingClientRect();burst(rc.left+Wd/2,rc.top+top+w*.3,'✨',10,40);
-      await miniFinish(tr('washDone'));if(my===flowId)resolve()}},400);
+  const finish=async()=>{if(done)return;done=true;clearInterval(iv);clearTimeout(safety);mx.clearRect(0,0,Wd,Hd);const rc=mc.getBoundingClientRect();burst(rc.left+rc.width/2,rc.top+rc.height*.55,'✨',10,40);
+    await miniFinish(tr('washDone'));if(my===flowId)resolve()};
+  const iv=setInterval(()=>{if(my!==flowId){clearInterval(iv);clearTimeout(safety);return}if(paused||done)return;if(sample()<=total*.2)finish()},400);
+  const safety=setTimeout(()=>{if(my===flowId)finish()},50000); // never get stuck: finishes by itself after ~50 seconds
 })}
 // Gas station: tap the pump N times, counting out loud
 function miniGas(my){return new Promise(resolve=>{
@@ -980,8 +987,10 @@ function miniGas(my){return new Promise(resolve=>{
   area.innerHTML=`<div class="gasgame"><div class="gasleft"><div class="gasnum">${n}</div><div class="drops">${'<span>💧</span>'.repeat(n)}</div></div><button class="btn green pump">⛽</button><div class="gauge"><i></i></div></div>`;
   let k=0,done=false,last=Date.now();const drops=area.querySelectorAll('.drops span'),fill=area.querySelector('.gauge i'),pump=area.querySelector('.pump');
   onTap(pump,async()=>{if(done)return;last=Date.now();k++;drops[k-1].classList.add('on');fill.style.height=(k/n*100)+'%';SFX.count(k);wiggle(pump);say([[NUMS[lg][k]]]);
-    if(k===n){done=true;await sleep(900);await miniFinish(tr('gasDone')(n));if(my===flowId)resolve()}});
+    if(k===n){done=true;clearTimeout(safety);await sleep(900);await miniFinish(tr('gasDone')(n));if(my===flowId)resolve()}});
   say(tr('gasSay')(n));nagger(my,(reset)=>reset?(last=Date.now()):last,tr('gasSay')(n),()=>done);
+  const safety=setTimeout(async()=>{if(done||my!==flowId)return;done=true;drops.forEach(d=>d.classList.add('on'));fill.style.height='100%';
+    await miniFinish(tr('gasDone')(n));if(my===flowId)resolve()},60000); // never get stuck
 })}
 // Parking: drag each car onto the spot with its color
 function miniPark(my){return new Promise(resolve=>{
@@ -1000,10 +1009,12 @@ function miniPark(my){return new Promise(resolve=>{
       spotsEl.querySelectorAll('.spot').forEach(s=>{const q=s.getBoundingClientRect();if(mx>q.left-25&&mx<q.right+25&&my2>q.top-25&&my2<q.bottom+60)hit=s});
       if(hit&&hit.dataset.c===c[1]&&!hit.classList.contains('full')){
         hit.textContent='';hit.appendChild(d);d.style.transform='';d.classList.add('parked');hit.classList.add('full');SFX.beep();parked++;say([[cname(c)+'!']]);
-        if(parked===cols.length){await sleep(700);await miniFinish(tr('parkDone'));if(my===flowId)resolve()}
+        if(parked===cols.length&&!finished){finished=true;clearTimeout(safety);await sleep(700);await miniFinish(tr('parkDone'));if(my===flowId)resolve()}
       }else{d.style.transition='transform .35s';d.style.transform='';if(hit){SFX.soft();say(tr('parkTry')(cname(c)))}}};
     d.addEventListener('pointerup',end);d.addEventListener('pointercancel',end)});
-  say(tr('parkSay'));nagger(my,(reset)=>reset?(last=Date.now()):last,tr('parkSay'),()=>parked===cols.length);
+  let finished=false;
+  say(tr('parkSay'));nagger(my,(reset)=>reset?(last=Date.now()):last,tr('parkSay'),()=>parked===cols.length||finished);
+  const safety=setTimeout(async()=>{if(finished||my!==flowId)return;finished=true;await miniFinish(tr('parkDone'));if(my===flowId)resolve()},75000); // never get stuck
 })}
 
 /* ---------- questions ---------- */
@@ -1433,7 +1444,7 @@ onTap($('#garageBack'),()=>{SFX.tap();goMap()});
 onTap($('#changeBuddy'),()=>{SFX.tap();goBuddy()});
 document.addEventListener('visibilitychange',()=>{if(document.hidden){hush();engineOff();touches.clear();save()}else if(state==='race'&&!paused){audioInit();engineOn()}});
 
-const VERSION='v8';$('#verLbl').textContent=VERSION;$('#verSet').textContent='· '+VERSION;
+const VERSION='v9';$('#verLbl').textContent=VERSION;$('#verSet').textContent='· '+VERSION;
 applyLang();resize();setTheme(THEMES[0],false);show('title');requestAnimationFrame(frame);
 loadClips();
 if(restActive()){goRest()}
