@@ -237,7 +237,7 @@ body.racing #pcorner .gearIco{opacity:0}
   <div class="logo"><span class="l1">Beep Beep</span><span class="l2">Buddies</span></div>
   <div class="bigcar">🚗💨</div>
   <button id="playBtn" class="btn green huge">▶</button>
-  <div class="langpick"><button class="lp" data-lang="en">🇺🇸 English</button><button class="lp" data-lang="es">🇲🇽 Español</button></div>
+  <div class="langpick"><button class="lp" data-lang="en">🇺🇸 English</button><button class="lp" data-lang="es">🇵🇷 Español</button></div>
   <div class="grownup" data-t="grown"></div>
   <div class="ver" id="verLbl"></div>
 </div>
@@ -314,7 +314,7 @@ body.racing #pcorner .gearIco{opacity:0}
       <div class="frow"><span>Say name in</span><label><input type="radio" name="nameLang" value="es"> Spanish</label><label><input type="radio" name="nameLang" value="en"> English</label><button id="testName" class="tbtn">▶ Test</button></div>
       <h3>Game language / Idioma</h3>
       <label><input type="radio" name="lang" value="en"> 🇺🇸 English</label>
-      <label><input type="radio" name="lang" value="es"> 🇲🇽 Español</label>
+      <label><input type="radio" name="lang" value="es"> 🇵🇷 Español</label>
     </details>
     <details><summary>❤️ Family voice</summary>
       <p class="pnote">Record your own voice! The game plays it when he gets a question right, or to cheer him on when he misses one. Up to 3 recordings each, about 5 seconds max. <b>Recordings stay on this phone only</b>, so record on each phone.</p>
@@ -1342,7 +1342,7 @@ onTap($('#garageBack'),()=>{SFX.tap();goMap()});
 onTap($('#changeBuddy'),()=>{SFX.tap();goBuddy()});
 document.addEventListener('visibilitychange',()=>{if(document.hidden){hush();engineOff();touches.clear();save()}else if(state==='race'&&!paused){audioInit();engineOn()}});
 
-const VERSION='v5';$('#verLbl').textContent=VERSION;$('#verSet').textContent='· '+VERSION;
+const VERSION='v6';$('#verLbl').textContent=VERSION;$('#verSet').textContent='· '+VERSION;
 applyLang();resize();setTheme(THEMES[0],false);show('title');requestAnimationFrame(frame);
 loadClips();
 if(restActive()){goRest()}

@@ -1,7 +1,7 @@
 // Offline support: keeps a copy of the game on the phone.
 // Online: always tries the newest version first (so updates arrive), but gives up after
 // a few seconds on a weak signal and uses the saved copy. Offline: uses the saved copy.
-const CACHE = 'beepbeep-v5';
+const CACHE = 'beepbeep-v6';
 const ASSETS = ['./', './index.html', './manifest.webmanifest', './icon-180.png', './icon-192.png', './icon-512.png'];
 
 self.addEventListener('install', e => {
