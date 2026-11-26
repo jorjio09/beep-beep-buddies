@@ -120,6 +120,13 @@ canvas{position:fixed;inset:0;width:100%;height:100%;display:block}
 .pbtns button{flex:1;min-width:120px;padding:13px;font-size:16px;font-weight:700;border-radius:12px;border:none;background:#eee;color:#222}
 .pbtns .primary{background:#2b8ce0;color:#fff}
 .pbtns .danger{background:#ffe3e3;color:#c00}
+.vrow{display:flex;align-items:center;gap:8px;padding:5px 0}
+.vrow span{width:64px;font-size:15px;font-weight:600}
+.vrow select{flex:1;min-width:0;font-size:15px;padding:8px;border-radius:10px;border:1px solid #ccc;background:#fff}
+.tbtn{padding:9px 12px;font-size:15px;font-weight:700;border-radius:10px;border:none;background:#2b8ce0;color:#fff}
+.langpick{position:fixed;top:max(10px,env(safe-area-inset-top));right:max(14px,env(safe-area-inset-right));display:flex;gap:6px;background:rgba(255,255,255,.35);padding:5px;border-radius:99px}
+.lp{border:none;font:700 15px system-ui,sans-serif;padding:8px 14px;border-radius:99px;background:transparent;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.35)}
+.lp.on{background:#fff;color:#2b6fd6;text-shadow:none;box-shadow:0 2px 0 rgba(0,0,0,.15)}
 .ptip{font-size:13.5px;color:#555;line-height:1.4;background:#f4f7ff;border-radius:10px;padding:10px 12px;margin-top:14px}
 @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
 @keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-14%)}}
@@ -140,13 +147,14 @@ canvas{position:fixed;inset:0;width:100%;height:100%;display:block}
   <div class="logo"><span class="l1">Beep Beep</span><span class="l2">Buddies</span></div>
   <div class="bigcar">🚗💨</div>
   <button id="playBtn" class="btn green huge">▶</button>
-  <div class="grownup">Grown-ups: hold the top-left corner for 3 seconds to open settings</div>
+  <div class="langpick"><button class="lp" data-lang="en">🇺🇸 English</button><button class="lp" data-lang="es">🇲🇽 Español</button></div>
+  <div class="grownup" data-t="grown"></div>
 </div>
 
-<div id="buddy" class="screen"><div class="htitle">Pick a buddy!</div><div id="buddyGrid" class="grid6"></div></div>
+<div id="buddy" class="screen"><div class="htitle" data-t="pick"></div><div id="buddyGrid" class="grid6"></div></div>
 
 <div id="map" class="screen">
-  <div class="htitle">Where should we drive?</div>
+  <div class="htitle" data-t="where"></div>
   <div id="levels" class="grid6"></div>
   <div class="maptools"><button id="bookBtn" class="btn round purple">📒</button><button id="changeBuddy" class="btn round orange">🐶</button></div>
 </div>
@@ -155,7 +163,7 @@ canvas{position:fixed;inset:0;width:100%;height:100%;display:block}
   <div class="hudtop"><div id="prog"><div id="progFill"></div><span id="progCar">🚗</span><span class="flag">🏁</span></div><div id="starCount">⭐ 0</div></div>
   <div id="arrowL" class="arrow">◀</div><div id="arrowR" class="arrow">▶</div>
 </div>
-<div id="banner">You did it! 🎉</div>
+<div id="banner" data-t="did"></div>
 
 <div id="quiz" class="screen dim">
   <div class="qcard">
@@ -165,12 +173,12 @@ canvas{position:fixed;inset:0;width:100%;height:100%;display:block}
 </div>
 
 <div id="sticker" class="screen dim">
-  <div class="stkcard"><div class="htitle dark">New sticker!</div><div id="stkBig">🦄</div><button id="stkNext" class="btn green bigbtn">▶</button></div>
+  <div class="stkcard"><div class="htitle dark" data-t="newStk"></div><div id="stkBig">🦄</div><button id="stkNext" class="btn green bigbtn">▶</button></div>
 </div>
 
 <div id="book" class="screen dim">
   <div class="bookcard">
-    <div class="bookhead"><button id="bookBack" class="btn round orange">⬅</button><div class="htitle dark">My Stickers</div><div id="bookCount"></div></div>
+    <div class="bookhead"><button id="bookBack" class="btn round orange">⬅</button><div class="htitle dark" data-t="myStk"></div><div id="bookCount"></div></div>
     <div id="bookGrid"></div>
   </div>
 </div>
@@ -178,9 +186,20 @@ canvas{position:fixed;inset:0;width:100%;height:100%;display:block}
 <div id="parent">
   <div class="pcard">
     <h2>Grown-up settings</h2>
+    <h3>Game language / Idioma</h3>
+    <label><input type="radio" name="lang" value="en"> 🇺🇸 English</label>
+    <label><input type="radio" name="lang" value="es"> 🇲🇽 Español</label>
     <h3>Sound</h3>
     <label><input type="checkbox" id="setSound"> Sound effects</label>
     <label><input type="checkbox" id="setVoice"> Talking voice</label>
+    <h3>Talking speed</h3>
+    <label><input type="radio" name="speed" value="vslow"> Extra slow</label>
+    <label><input type="radio" name="speed" value="slow"> Slow</label>
+    <label><input type="radio" name="speed" value="normal"> Normal</label>
+    <h3>Voices</h3>
+    <div class="vrow"><span>English</span><select id="voiceEn"></select><button id="testEn" class="tbtn">▶ Test</button></div>
+    <div class="vrow"><span>Español</span><select id="voiceEs"></select><button id="testEs" class="tbtn">▶ Test</button></div>
+    <div class="ptip"><b>Want a more natural voice?</b> On the iPhone go to Settings → Accessibility → Spoken Content (called <i>Read &amp; Speak</i> on some newer iPhones) → Voices. Under <b>English</b> download <b>Ava (Premium)</b> or <b>Samantha (Enhanced)</b>. Under <b>Spanish</b> download <b>Paulina (Enhanced)</b> or <b>Mónica (Enhanced)</b>. Then close and reopen the game and pick them above. The best voices are listed first.</div>
     <h3>Learning topics</h3>
     <label><input type="checkbox" data-sub="math"> Math (+ and −)</label>
     <label><input type="checkbox" data-sub="count"> Counting</label>
@@ -217,7 +236,21 @@ const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 function onTap(el,fn){el.addEventListener('pointerup',e=>{e.preventDefault();e.stopPropagation();fn(e)})}
 
 /* ---------- data ---------- */
-const BUDDIES=[{e:'🐶',c:'#ff5a5a',name:'Puppy'},{e:'🐱',c:'#ffa41b',name:'Kitty'},{e:'🦖',c:'#22c065',name:'Dino'},{e:'🐰',c:'#ff6fcf',name:'Bunny'},{e:'🐻',c:'#3d9bff',name:'Bear'},{e:'🐸',c:'#9b5cff',name:'Froggy'}];
+const BUDDIES=[{e:'🐶',c:'#ff5a5a',name:'Puppy',es:'Perrito'},{e:'🐱',c:'#ffa41b',name:'Kitty',es:'Gatito'},{e:'🦖',c:'#22c065',name:'Dino',es:'Dino'},{e:'🐰',c:'#ff6fcf',name:'Bunny',es:'Conejito'},{e:'🐻',c:'#3d9bff',name:'Bear',es:'Osito'},{e:'🐸',c:'#9b5cff',name:'Froggy',es:'Ranita'}];
+const T={
+ en:{grown:'Grown-ups: hold the top-left corner for 3 seconds to open settings',pick:'Pick a buddy!',pickSay:'Pick your buddy!',where:'Where should we drive?',
+   ready:[['Ready…','en'],['set…','en'],['go!','en']],did:'You did it! 🎉',didSay:n=>`You did it! You got ${n} ${n===1?'star':'stars'}!`,
+   countTog:"Let's count together!",lookTog:"Let's look together!",newStk:'New sticker!',newStkSay:'You got a new sticker!',stkSay:'You got a sticker!',
+   myStk:'My Stickers',haveStk:n=>`You have ${n} ${n===1?'sticker':'stickers'}!`,noStk:'Finish a road to get stickers!',bouncy:"Let's try the bouncy one first!",
+   beep:'Beep beep!',hello:'Hello! Let’s play!',tags:{math:'Math',count:'Counting',english:'English',spanish:'Spanish',letters:'Letters'}},
+ es:{grown:'Adultos: mantengan presionada la esquina de arriba a la izquierda 3 segundos para abrir los ajustes',pick:'¡Escoge un amigo!',pickSay:'¡Escoge tu amigo!',where:'¿A dónde vamos?',
+   ready:[['En sus marcas…','es'],['listos…','es'],['¡fuera!','es']],did:'¡Lo lograste! 🎉',didSay:n=>`¡Lo lograste! ¡Ganaste ${n} ${n===1?'estrella':'estrellas'}!`,
+   countTog:'¡Vamos a contar juntos!',lookTog:'¡Vamos a ver juntos!',newStk:'¡Estampa nueva!',newStkSay:'¡Ganaste una estampa nueva!',stkSay:'¡Ganaste una estampa!',
+   myStk:'Mis estampas',haveStk:n=>`¡Tienes ${n} ${n===1?'estampa':'estampas'}!`,noStk:'¡Termina un camino para ganar estampas!',bouncy:'¡Primero el que está brincando!',
+   beep:'¡Bip bip!',hello:'¡Hola! ¡Vamos a jugar!',tags:{math:'Matemáticas',count:'Contar',english:'Inglés',spanish:'Español',letters:'Letras'}}
+};
+const NUMS={en:['zero','one','two','three','four','five','six','seven','eight','nine','ten'],es:['cero','uno','dos','tres','cuatro','cinco','seis','siete','ocho','nueve','diez']};
+const LETTERS_ES={A:['🐝','abeja'],B:['⛵','barco'],C:['🏠','casa'],D:['🎲','dado'],E:['🐘','elefante'],F:['🌸','flor'],G:['🐱','gato'],H:['🍦','helado'],I:['🏝️','isla'],J:['🦒','jirafa'],K:['🐨','koala'],L:['🌙','luna'],M:['🍎','manzana'],N:['☁️','nube'],O:['🐻','oso'],P:['🐶','perro'],Q:['🧀','queso'],R:['🐭','ratón'],S:['☀️','sol'],T:['🐢','tortuga'],U:['🍇','uvas'],V:['🐮','vaca'],Y:['🪀','yoyo'],Z:['👟','zapato']};
 const THEMES=[
  {name:'Farm',icon:'🚜',sky:['#5fc0ff','#c9efff'],g:['#7ccf5a','#6fc24e'],road:['#8b8f98','#848891'],rumble:['#ffffff','#ff5b4a'],side:['🌳','🌻','🐄','🐑','🏡','🌳','🌾','🐓'],treat:'🍎',bump:['🎃','📦'],bg:'hills',h1:'#5fb546',h2:'#9ade72'},
  {name:'Beach',icon:'🏖️',sky:['#3db4ff','#bdf0ff'],g:['#f6dc93','#efd17d'],road:['#9a9aa3','#92929b'],rumble:['#ffffff','#2fb8ff'],side:['🌴','⛱️','🦀','🐚','🌴','🏄'],treat:'🍉',bump:['🏐','📦'],bg:'ocean'},
@@ -227,18 +260,25 @@ const THEMES=[
  {name:'Space',icon:'🚀',sky:['#0d0a33','#3b2a85'],g:['#4b3a99','#42338a'],road:['#5d5f7a','#565873'],rumble:['#ffffff','#ff4fd8'],side:['🪐','🌙','🚀','👽','🛸','🌟'],treat:'🍭',bump:['☄️','🛸'],bg:'space'}
 ];
 const STICKERS=['🦄','🐳','🦋','🌈','🍦','🚀','🦕','🐙','🐼','🦒','🐢','🦜','🍕','🎸','🏆','🌻','🐝','🦊','🐧','🍉','🚂','🎠','🦩','🐬','🍰','⚽','🧸','🎉','🐞','🌟'];
-const COUNT_ITEMS=[['🦆','duck','ducks'],['🍎','apple','apples'],['⭐','star','stars'],['🐟','fish','fish'],['🐞','ladybug','ladybugs'],['🍓','strawberry','strawberries'],['🚗','car','cars'],['🎈','balloon','balloons'],['🐥','chick','chicks'],['🍪','cookie','cookies']];
+// [emoji, en one, en many, es one, es many, es feminine]
+const COUNT_ITEMS=[['🦆','duck','ducks','pato','patos',0],['🍎','apple','apples','manzana','manzanas',1],['⭐','star','stars','estrella','estrellas',1],['🐟','fish','fish','pez','peces',0],['🐞','ladybug','ladybugs','mariquita','mariquitas',1],['🍓','strawberry','strawberries','fresa','fresas',1],['🚗','car','cars','carro','carros',0],['🎈','balloon','balloons','globo','globos',0],['🐥','chick','chicks','pollito','pollitos',0],['🍪','cookie','cookies','galleta','galletas',1]];
 const WORDS=[['🐶','dog','el perro'],['🐱','cat','el gato'],['🐮','cow','la vaca'],['🐷','pig','el cerdo'],['🐴','horse','el caballo'],['🐟','fish','el pez'],['🐦','bird','el pájaro'],['🦆','duck','el pato'],['🐻','bear','el oso'],['🐵','monkey','el mono'],['🦁','lion','el león'],['🐘','elephant','el elefante'],['🍎','apple','la manzana'],['🍌','banana','el plátano'],['🍓','strawberry','la fresa'],['🥛','milk','la leche'],['🍪','cookie','la galleta'],['🚗','car','el carro'],['🚌','bus','el autobús'],['✈️','airplane','el avión'],['⚽','ball','la pelota'],['🏠','house','la casa'],['☀️','sun','el sol'],['🌙','moon','la luna'],['⭐','star','la estrella'],['🌳','tree','el árbol'],['🌸','flower','la flor'],['👟','shoe','el zapato'],['📚','book','el libro'],['🎈','balloon','el globo']];
 const COLORS=[['#e53935','red','rojo'],['#1e88e5','blue','azul'],['#fdd835','yellow','amarillo'],['#43a047','green','verde'],['#fb8c00','orange','anaranjado'],['#8e24aa','purple','morado'],['#f06292','pink','rosa'],['#222222','black','negro'],['#ffffff','white','blanco'],['#795548','brown','café']];
 const LETTERS={A:['🍎','apple'],B:['⚽','ball'],C:['🐱','cat'],D:['🐶','dog'],E:['🐘','elephant'],F:['🐟','fish'],G:['🍇','grapes'],H:['🐴','horse'],I:['🍦','ice cream'],J:['🧃','juice'],K:['🪁','kite'],L:['🦁','lion'],M:['🌙','moon'],N:['👃','nose'],O:['🍊','orange'],P:['🐷','pig'],Q:['👸','queen'],R:['🌈','rainbow'],S:['☀️','sun'],T:['🌳','tree'],U:['☂️','umbrella'],V:['🎻','violin'],W:['🐳','whale'],Y:['🪀','yo-yo'],Z:['🦓','zebra']};
-const NUMW=['zero','one','two','three','four','five','six','seven','eight','nine','ten'];
 
 /* ---------- save ---------- */
 const SAVE_KEY='beepbeep_v1';
-const DEFAULTS={buddy:null,unlocked:1,completed:[],stickers:[],totalStars:0,levelsDone:0,settings:{sound:true,voice:true,math:'easy',perLevel:1,subjects:{math:true,count:true,english:true,spanish:true,letters:true}}};
+const DEFAULTS={buddy:null,unlocked:1,completed:[],stickers:[],totalStars:0,levelsDone:0,settings:{lang:'en',speed:'slow',voiceName:{en:'',es:''},sound:true,voice:true,math:'easy',perLevel:1,subjects:{math:true,count:true,english:true,spanish:true,letters:true}}};
 const clone=o=>JSON.parse(JSON.stringify(o));
-function load(){try{const d=JSON.parse(localStorage.getItem(SAVE_KEY));if(d){const m=Object.assign(clone(DEFAULTS),d);m.settings=Object.assign(clone(DEFAULTS.settings),d.settings||{});m.settings.subjects=Object.assign(clone(DEFAULTS.settings.subjects),(d.settings||{}).subjects||{});return m}}catch(e){}return clone(DEFAULTS)}
+function load(){try{const d=JSON.parse(localStorage.getItem(SAVE_KEY));if(d){const m=Object.assign(clone(DEFAULTS),d);const ds=d.settings||{};m.settings=Object.assign(clone(DEFAULTS.settings),ds);m.settings.subjects=Object.assign(clone(DEFAULTS.settings.subjects),ds.subjects||{});m.settings.voiceName=Object.assign(clone(DEFAULTS.settings.voiceName),ds.voiceName||{});return m}}catch(e){}return clone(DEFAULTS)}
 let S=load();
+const L=()=>S.settings.lang==='es'?'es':'en';
+const tr=k=>T[L()][k];
+function applyLang(){
+  document.documentElement.lang=L();
+  document.querySelectorAll('[data-t]').forEach(el=>el.textContent=tr(el.dataset.t));
+  document.querySelectorAll('.lp').forEach(b=>b.classList.toggle('on',b.dataset.lang===L()));
+}
 function save(){try{localStorage.setItem(SAVE_KEY,JSON.stringify(S))}catch(e){}}
 
 /* ---------- audio ---------- */
@@ -273,32 +313,43 @@ function engineSet(fr){if(eng)eng.o.frequency.setTargetAtTime(48+fr*70,AC.curren
 /* ---------- speech ---------- */
 const synth=window.speechSynthesis;
 const voices={en:null,es:null};
+// Novelty / old robotic voices that ship with Apple devices: never pick these automatically
+const BAD_VOICES=/Albert|Bad News|Bahh|Bells|Boing|Bubbles|Cellos|Good News|Jester|Organ|Superstar|Trinoids|Whisper|Wobble|Zarvox|Fred|Junior|Kathy|Ralph|Rocko|Grandma|Grandpa|Abuel|Eddy|Flo|Reed|Sandy|Shelley/i;
+function voiceScore(v,lang){
+  const n=v.name,lg=v.lang.replace('_','-').toLowerCase();let s=0;
+  if(/premium/i.test(n))s+=100;if(/enhanced|mejorada/i.test(n))s+=70;if(/natural|neural|online/i.test(n))s+=60;
+  if(lang==='en'){if(/Ava|Zoe|Samantha|Allison|Evan|Nathan|Susan|Joelle|Noelle|Aria|Jenny|Google US/i.test(n))s+=25;if(lg==='en-us')s+=12;else if(/en-(gb|au|ca|ie)/.test(lg))s+=4}
+  else{if(/Paulina|Mónica|Monica|Marisol|Angélica|Angelica|Juan|Dalia|Jorge|Google español/i.test(n))s+=25;if(lg==='es-mx'||lg==='es-us')s+=12;else if(lg==='es-es')s+=6}
+  if(BAD_VOICES.test(n))s-=200;
+  return s;
+}
+function voiceList(lang){if(!synth)return [];return synth.getVoices().filter(v=>v.lang.toLowerCase().startsWith(lang)).sort((a,b)=>voiceScore(b,lang)-voiceScore(a,lang))}
 function loadVoices(){
-  if(!synth)return;const vs=synth.getVoices();if(!vs.length)return;
-  const find=(pre,names,reg)=>{for(const n of names){const v=vs.find(v=>v.name.includes(n)&&v.lang.toLowerCase().startsWith(pre));if(v)return v}
-    return vs.find(v=>v.lang.replace('_','-').toLowerCase()===reg)||vs.find(v=>v.lang.toLowerCase().startsWith(pre))||null};
-  voices.en=find('en',['Samantha','Karen','Moira','Google US English'],'en-us');
-  voices.es=find('es',['Paulina','Mónica','Monica','Google español de Estados Unidos','Google español'],'es-mx');
+  if(!synth)return;
+  for(const lang of ['en','es']){const list=voiceList(lang);const want=S.settings.voiceName[lang];voices[lang]=(want&&list.find(v=>v.name===want))||list[0]||null}
+  if($('#parent').classList.contains('on'))fillVoiceMenus();
 }
 loadVoices();if(synth&&'onvoiceschanged' in synth)synth.onvoiceschanged=loadVoices;
+const RATES={vslow:.62,slow:.75,normal:.9};
 let speakTok=0;
 function sayOne(text,lang){
   return new Promise(res=>{
-    if(!synth||!S.settings.voice){setTimeout(res,Math.min(1500,300+text.length*45));return}
-    if(!voices.en)loadVoices();
+    if(!synth||!S.settings.voice){setTimeout(res,Math.min(1800,350+text.length*55));return}
+    if(!voices[lang])loadVoices();
     const u=new SpeechSynthesisUtterance(text);u.lang=lang==='es'?'es-MX':'en-US';
-    const v=voices[lang];if(v)u.voice=v;u.rate=lang==='es'?.85:.92;u.pitch=1.15;
+    const v=voices[lang];if(v){u.voice=v;u.lang=v.lang}
+    u.rate=RATES[S.settings.speed]||.75;u.pitch=1.05;u.volume=1;
     let done=false;const fin=()=>{if(!done){done=true;res()}};
-    u.onend=fin;u.onerror=fin;setTimeout(fin,1500+text.length*110);
+    u.onend=fin;u.onerror=fin;setTimeout(fin,2000+text.length*170);
     window.__u=u;if(synth.paused)synth.resume();synth.speak(u);
   });
 }
-// list: string, or array of [text, lang]
+// list: string (spoken in the game language), or array of [text, lang]; short pause between phrases
 async function say(list,interrupt=true){
-  if(typeof list==='string')list=[[list,'en']];
+  if(typeof list==='string')list=[[list,L()]];
   if(interrupt){speakTok++;if(synth)synth.cancel()}
   const tok=speakTok;
-  for(const [t,l] of list){if(tok!==speakTok)return;await sayOne(t,l||'en')}
+  for(let i=0;i<list.length;i++){const [t,l]=list[i];if(tok!==speakTok)return;await sayOne(t,l||L());if(i<list.length-1)await sleep(220)}
 }
 function hush(){speakTok++;if(synth)synth.cancel()}
 let unlockedSpeech=false;
@@ -500,8 +551,8 @@ function setTheme(th,items){theme=th;buildRoad(th,items);pos=0;lastSeg=-1}
 function goBuddy(){
   flowId++;state='buddy';show('buddy');const g=$('#buddyGrid');g.innerHTML='';let chosen=false;
   BUDDIES.forEach((b,i)=>{const el=document.createElement('button');el.className='btn card';el.style.background=`linear-gradient(${shade(b.c,.25)},${b.c})`;el.textContent=b.e;
-    onTap(el,async()=>{if(chosen)return;chosen=true;S.buddy=i;save();SFX.beep();el.classList.add('wiggle');const my=flowId;await say(`${b.name}! Beep beep!`);if(my===flowId)goMap()});g.appendChild(el)});
-  say('Pick your buddy!');
+    onTap(el,async()=>{if(chosen)return;chosen=true;S.buddy=i;save();SFX.beep();el.classList.add('wiggle');const my=flowId;await say([[(L()==='es'?b.es:b.name)+'!'],[tr('beep')]]);if(my===flowId)goMap()});g.appendChild(el)});
+  say(tr('pickSay'));
 }
 function nextIdx(){for(let i=0;i<S.unlocked;i++)if(!S.completed[i])return i;return -1}
 function goMap(){
@@ -511,19 +562,19 @@ function goMap(){
   const box=$('#levels');box.innerHTML='';
   THEMES.forEach((th,i)=>{const b=document.createElement('button');b.className='btn lvl';b.style.background=`linear-gradient(${th.sky[0]} 40%,${th.g[0]})`;b.textContent=th.icon;
     const open=i<S.unlocked;if(!open)b.classList.add('locked');if(S.completed[i])b.classList.add('done');if(i===ni)b.classList.add('next');
-    onTap(b,()=>{if(open){SFX.tap();startLevel(i)}else{SFX.soft();say("Let's try the bouncy one first!")}});box.appendChild(b)});
-  say('Where should we drive?');
+    onTap(b,()=>{if(open){SFX.tap();startLevel(i)}else{SFX.soft();say(tr('bouncy'))}});box.appendChild(b)});
+  say(tr('where'));
 }
 function startLevel(li){
   flowId++;hush();level=li;setTheme(THEMES[li],true);speed=0;playerX=0;steerVis=0;stars=0;bumpT=0;raceT=0;lastInputT=0;
   starEl.textContent='⭐ 0';$('#progCar').textContent=buddy().e;state='race';show('hud');engineOn();
-  say('Ready, set, go!');
+  say(tr('ready'));
 }
 async function finishLevel(){
   const my=++flowId;state='finish';engineOff();touches.clear();
   $('#banner').classList.add('show');confetti();SFX.yay();
   S.totalStars+=stars;S.completed[level]=true;S.unlocked=Math.max(S.unlocked,Math.min(THEMES.length,level+2));S.levelsDone++;save();
-  await say(`You did it! You got ${stars} stars!`);await sleep(500);if(my!==flowId)return;
+  await say(tr('didSay')(stars));await sleep(500);if(my!==flowId)return;
   $('#banner').classList.remove('show');
   state='quiz';const n=S.settings.perLevel;
   for(let i=0;i<n;i++){await askOne(nextQuestion(),i,n,my);if(my!==flowId)return}
@@ -536,58 +587,79 @@ function mathMax(){return S.settings.math==='medium'?10:5}
 function numChoices(n,min,max){const set=new Set([n]);for(const c of shuffle([n-1,n+1,n-2,n+2,n+3,n-3])){if(set.size>=3)break;if(c>=min&&c<=max)set.add(c)}let v=min;while(set.size<3){set.add(v);v++}return shuffle([...set])}
 function numAnswers(n,min,max){return numChoices(n,min,max).map(v=>({ok:v===n,html:`<div class="num">${v}</div><div class="dots">${'<i></i>'.repeat(v)}</div>`}))}
 function items(e,n,cls=''){return Array.from({length:n},()=>`<span class="it ${cls}"><span class="g">${e}</span></span>`).join('')}
-function itemSize(total,extra=0){if(H>W)return Math.min(W*.15,H*(total>5?.055:.08));returnMath.max(22,Math.min(H*(extra||total>5?.13:.2),(Math.min(W*.97,980)-140)/(total+extra)*.9))}
+function itemSize(total,extra=0){if(H>W)return Math.min(W*.15,H*(total>5?.055:.08));return Math.max(22,Math.min(H*(extra||total>5?.13:.2),(Math.min(W*.97,980)-140)/(total+extra)*.9))}
+const cap=s=>s.charAt(0).toUpperCase()+s.slice(1);
 function fresh(list,key){const f=list.filter(x=>!recent.includes(key(x)));const p=pick(f.length?f:list);recent.push(key(p));if(recent.length>8)recent.shift();return p}
 
 async function countAlong(vis,q){
   const els=[...vis.querySelectorAll('.it:not(.away)')];let k=0;
-  for(const el of els){if(q.dead)return;k++;el.classList.add('counted');el.dataset.n=k;SFX.count(k);await say([[String(k),'en']],false);await sleep(120)}
-  if(!q.dead)await say([[`${NUMW[k]}!`,'en']],false);
+  const lg=L();
+  for(const el of els){if(q.dead)return;k++;el.classList.add('counted');el.dataset.n=k;SFX.count(k);await say([[NUMS[lg][k],lg]],false);await sleep(250)}
+  if(!q.dead)await say([[lg==='es'?(k===1?'¡Es uno!':`¡Son ${NUMS.es[k]}!`):`That's ${NUMS.en[k]}!`,lg]],false);
 }
+// Every spoken line is a list of short phrases [text, lang?]; lang defaults to the game language.
 function makeAdd(){
   const max=mathMax();let a,b;do{a=ri(1,max===5?3:6);b=ri(1,max===5?3:5)}while(a+b>max);
-  const [e]=fresh(COUNT_ITEMS,x=>x[0]),n=a+b,fs=itemSize(a+b,2);
-  return {tag:'Math',math:true,
+  const [e]=fresh(COUNT_ITEMS,x=>x[0]),n=a+b,fs=itemSize(a+b,2),es=L()==='es';
+  return {tag:'math',math:true,
     visual:`<div class="eq" style="font-size:${fs}px"><div class="grp">${items(e,a)}</div><div class="op">+</div><div class="grp">${items(e,b)}</div></div><div class="numline">${a} + ${b} = ?</div>`,
-    answers:numAnswers(n,0,10),prompt:[[`What is ${a} plus ${b}?`,'en']],praise:[[`Yes! ${a} plus ${b} is ${n}!`,'en']],
+    answers:numAnswers(n,0,10),
+    prompt:es?[['¿Cuánto es'],[`${a} más ${b}?`]]:[['What is'],[`${a} plus ${b}?`]],
+    praise:es?[['¡Sí!'],[`${a} más ${b} son ${n}.`]]:[['Yes!'],[`${a} plus ${b} is ${n}.`]],
     teach(vis){return countAlong(vis,this)}};
 }
 function makeSub(){
-  const max=mathMax();const a=ri(2,max),b=ri(1,a-1);const [e,,many]=fresh(COUNT_ITEMS,x=>x[0]),fs=itemSize(a);
-  return {tag:'Math',math:true,
-    visual:`<div class="eq" style="font-size:${fs}px"><div class="grp">${items(e,a-b)}${items(e,b,'leaving')}</div></div><div class="numline">${a} − ${b} = ?</div>`,
-    answers:numAnswers(a-b,0,10),prompt:[[`${a} ${many}. ${b} goes away. How many are left?`,'en']],praise:[[`Yes! ${a} take away ${b} is ${a-b}!`,'en']],
+  const max=mathMax();const a=ri(2,max),b=ri(1,a-1),n=a-b;const [e,,many,,esMany,fem]=fresh(COUNT_ITEMS,x=>x[0]),fs=itemSize(a),es=L()==='es';
+  return {tag:'math',math:true,
+    visual:`<div class="eq" style="font-size:${fs}px"><div class="grp">${items(e,n)}${items(e,b,'leaving')}</div></div><div class="numline">${a} − ${b} = ?</div>`,
+    answers:numAnswers(n,0,10),
+    prompt:es?[[`${a} ${esMany}.`],[b===1?(fem?'Se va una.':'Se va uno.'):`Se van ${b}.`],[fem?'¿Cuántas quedan?':'¿Cuántos quedan?']]
+             :[[`${a} ${many}.`],[`${b} ${b===1?'goes':'go'} away.`],['How many are left?']],
+    praise:es?[['¡Sí!'],[`${a} menos ${b} ${n===1?'es':'son'} ${n}.`]]:[['Yes!'],[`${a} take away ${b} is ${n}.`]],
     onShow(vis){setTimeout(()=>vis.querySelectorAll('.leaving').forEach(el=>el.classList.add('away')),1300)},
     teach(vis){vis.querySelectorAll('.leaving').forEach(el=>el.classList.add('away'));return countAlong(vis,this)}};
 }
 function makeCount(){
-  const n=ri(1,mathMax());const [e,one,many]=fresh(COUNT_ITEMS,x=>x[0]),fs=itemSize(n);
-  return {tag:'Counting',math:true,visual:`<div class="eq" style="font-size:${fs}px"><div class="grp">${items(e,n)}</div></div>`,
-    answers:numAnswers(n,1,10),prompt:[[`How many ${many}?`,'en']],praise:[[`Yes! ${n} ${n===1?one:many}!`,'en']],teach(vis){return countAlong(vis,this)}};
+  const n=ri(1,mathMax());const [e,one,many,esOne,esMany,fem]=fresh(COUNT_ITEMS,x=>x[0]),fs=itemSize(n),es=L()==='es';
+  return {tag:'count',math:true,visual:`<div class="eq" style="font-size:${fs}px"><div class="grp">${items(e,n)}</div></div>`,
+    answers:numAnswers(n,1,10),
+    prompt:es?[[`¿${fem?'Cuántas':'Cuántos'} ${esMany}?`]]:[[`How many ${many}?`]],
+    praise:es?[['¡Sí!'],[n===1?`${fem?'Una':'Un'} ${esOne}.`:`${n} ${esMany}.`]]:[['Yes!'],[`${n} ${n===1?one:many}.`]],
+    teach(vis){return countAlong(vis,this)}};
 }
 function hintTeach(lines){return async function(vis,el){el.classList.add('hint');await say(lines,false)}}
-function makeColor(lang){
-  const opts=shuffle(COLORS.slice()).slice(0,3),tg=fresh(opts,x=>x[1]),[hex,en,es]=tg;
+// tl = language being taught (en or es); the game talks in L()
+function makeColor(tl){
+  const opts=shuffle(COLORS.slice()).slice(0,3),tg=fresh(opts,x=>x[1]),[,en,es]=tg,nl=L();
   const answers=opts.map(c=>({ok:c===tg,html:`<div class="blob" style="background:${c[0]}"></div>`}));
-  if(lang==='es')return {tag:'Español',visual:`<div class="bigemoji">🎨</div><div class="wordbig">${es}</div>`,answers,
-    prompt:[['Which one is','en'],[es+'?','es']],praise:[['¡Sí! '+es+'!','es'],[`That's ${en}!`,'en']],teach:hintTeach([['This one is','en'],[es,'es'],[`${en}!`,'en']])};
-  return {tag:'English',visual:`<div class="bigemoji">🎨</div><div class="wordbig">${en}</div>`,answers,
-    prompt:[[`Which one is ${en}?`,'en']],praise:[[`Yes! That's ${en}!`,'en']],teach:hintTeach([[`This one is ${en}! ${en}!`,'en']])};
+  const sub=tl!==nl?`<div class="wordsub">${tl==='es'?'Español':'English'}</div>`:'';
+  let prompt,praise,teach;
+  if(nl==='en'&&tl==='en'){prompt=[[`Which one is ${en}?`]];praise=[['Yes!'],[`That's ${en}.`]];teach=[['This one is'],[`${en}!`]]}
+  else if(nl==='es'&&tl==='es'){prompt=[[`¿Cuál es ${es}?`]];praise=[['¡Sí!'],[`Es ${es}.`]];teach=[['Este es'],[`¡${es}!`]]}
+  else if(nl==='en'){prompt=[['Which one is','en'],[es+'?','es']];praise=[['¡Sí!','es'],[cap(es)+'!','es'],[`That's ${en}.`,'en']];teach=[['This one is','en'],[es+'.','es'],[`That means ${en}.`,'en']]}
+  else{prompt=[['¿Cuál es','es'],[en+'?','en']];praise=[['¡Sí!','es'],[cap(en)+'!','en'],[`Es ${es}.`,'es']];teach=[['Este es','es'],[en+'.','en'],[`Quiere decir ${es}.`,'es']]}
+  return {tag:tl==='es'?'spanish':'english',visual:`<div class="bigemoji">🎨</div><div class="wordbig">${tl==='es'?es:en}</div>${sub}`,answers,prompt,praise,teach:hintTeach(teach)};
 }
-function makeWord(lang){
-  if(Math.random()<.3)return makeColor(lang);
+function makeWord(tl){
+  if(Math.random()<.3)return makeColor(tl);
   const tg=fresh(WORDS,x=>x[1]);const others=shuffle(WORDS.filter(w=>w!==tg)).slice(0,2);const opts=shuffle([tg,...others]);
-  const answers=opts.map(w=>({ok:w===tg,html:`<div class="pic">${w[0]}</div>`}));const [,en,es]=tg;
-  if(lang==='es')return {tag:'Español',visual:`<div class="wordbig">${es}</div><div class="wordsub">Spanish</div>`,answers,
-    prompt:[['Can you find','en'],[es+'?','es']],praise:[['¡Muy bien! '+es+'!','es'],[`You found the ${en}!`,'en']],teach:hintTeach([['This one is','en'],[es,'es'],[`the ${en}!`,'en']])};
-  return {tag:'English',visual:`<div class="wordbig">${en}</div>`,answers,
-    prompt:[[`Can you find the ${en}?`,'en']],praise:[[`Yes! That's the ${en}!`,'en']],teach:hintTeach([[`Here is the ${en}! ${en}!`,'en']])};
+  const answers=opts.map(w=>({ok:w===tg,html:`<div class="pic">${w[0]}</div>`}));const [,en,es]=tg,nl=L();
+  const sub=tl!==nl?`<div class="wordsub">${tl==='es'?'Español':'English'}</div>`:'';
+  let prompt,praise,teach;
+  if(nl==='en'&&tl==='en'){prompt=[['Can you find'],[`the ${en}?`]];praise=[['Yes!'],[`That's the ${en}.`]];teach=[['Here is'],[`the ${en}!`]]}
+  else if(nl==='es'&&tl==='es'){prompt=[['¿Dónde está'],[es+'?']];praise=[['¡Sí!'],[`¡${cap(es)}!`]];teach=[['Aquí está'],[`¡${es}!`]]}
+  else if(nl==='en'){prompt=[['Can you find','en'],[es+'?','es']];praise=[['¡Muy bien!','es'],[cap(es)+'.','es'],[`That's the ${en}.`,'en']];teach=[['This one is','en'],[es+'.','es'],[`That means the ${en}.`,'en']]}
+  else{prompt=[['¿Dónde está','es'],[`the ${en}?`,'en']];praise=[['¡Muy bien!','es'],[`The ${en}.`,'en'],[`Es ${es}.`,'es']];teach=[['Aquí está','es'],[`the ${en}.`,'en'],[`Quiere decir ${es}.`,'es']]}
+  return {tag:tl==='es'?'spanish':'english',visual:`<div class="wordbig">${tl==='es'?es:en}</div>${sub}`,answers,prompt,praise,teach:hintTeach(teach)};
 }
 function makeLetter(){
-  const keys=Object.keys(LETTERS);const L=fresh(keys,x=>'L'+x);const opts=shuffle([L,...shuffle(keys.filter(k=>k!==L)).slice(0,2)]);const [e,word]=LETTERS[L];
-  return {tag:'Letters',visual:`<div class="bigemoji">${e}</div><div class="wordbig"><span class="hl">${word[0]}</span>${word.slice(1)}</div>`,
-    answers:opts.map(k=>({ok:k===L,html:`<div class="letter">${k}</div>`})),
-    prompt:[[`Find the letter ${L}. ${L} is for ${word}!`,'en']],praise:[[`Yes! That's ${L}! ${L} is for ${word}!`,'en']],teach:hintTeach([[`This is the letter ${L}. ${L}!`,'en']])};
+  const es=L()==='es',MAP=es?LETTERS_ES:LETTERS,keys=Object.keys(MAP);const ch=fresh(keys,x=>'L'+x);
+  const opts=shuffle([ch,...shuffle(keys.filter(k=>k!==ch)).slice(0,2)]);const [e,word]=MAP[ch];
+  return {tag:'letters',visual:`<div class="bigemoji">${e}</div><div class="wordbig"><span class="hl">${word[0].toUpperCase()}</span>${word.slice(1)}</div>`,
+    answers:opts.map(k=>({ok:k===ch,html:`<div class="letter">${k}</div>`})),
+    prompt:es?[[`Busca la letra ${ch}.`],[`${ch} de ${word}.`]]:[[`Find the letter ${ch}.`],[`${ch} is for ${word}.`]],
+    praise:es?[['¡Sí!'],[`Es la ${ch}.`],[`${ch} de ${word}.`]]:[['Yes!'],[`That's ${ch}.`],[`${ch} is for ${word}!`]],
+    teach:hintTeach(es?[['Esta es la letra'],[`${ch}.`]]:[['This is the letter'],[`${ch}.`]])};
 }
 function nextQuestion(){
   let subs=Object.keys(S.settings.subjects).filter(k=>S.settings.subjects[k]);if(!subs.length)subs=['math'];
@@ -600,7 +672,7 @@ function wiggle(el){el.classList.remove('wiggle');void el.offsetWidth;el.classLi
 function askOne(q,i,total,my){
   return new Promise(resolve=>{
     curQ=q;show('quiz');const vis=$('#qVisual'),ans=$('#qAnswers');
-    vis.innerHTML=q.visual;ans.innerHTML='';ans.classList.remove('solved');$('#qTag').textContent=q.tag;
+    vis.innerHTML=q.visual;ans.innerHTML='';ans.classList.remove('solved');$('#qTag').textContent=tr('tags')[q.tag];
     $('#qDots').textContent=total>1?'●'.repeat(i+1)+'○'.repeat(total-i-1):'';
     const qc=$('.qcard');qc.style.animation='none';void qc.offsetWidth;qc.style.animation='';
     let locked=true,teaching=false;const right=()=>q.answers.find(a=>a.ok).el;
@@ -610,7 +682,7 @@ function askOne(q,i,total,my){
         if(a.ok){q.dead=true;hush();b.classList.remove('hint');b.classList.add('right');ans.classList.add('solved');SFX.yay();confetti(90);
           await say(q.praise);await sleep(400);resolve();return}
         wiggle(b);SFX.soft();if(teaching)return;teaching=true;
-        await say(q.math?"Let's count together!":"Let's look together!");if(q.dead||my!==flowId)return;
+        await say(tr(q.math?'countTog':'lookTog'));if(q.dead||my!==flowId)return;
         await q.teach(vis,right());if(q.dead)return;right().classList.add('hint');teaching=false});
     });
     if(q.onShow)q.onShow(vis);
@@ -625,7 +697,7 @@ function giveSticker(my){
     const notOwned=STICKERS.filter(s=>!S.stickers.includes(s));const s=notOwned.length?pick(notOwned):pick(STICKERS);
     if(!S.stickers.includes(s))S.stickers.push(s);save();
     show('sticker');const big=$('#stkBig');big.textContent=s;big.style.animation='none';void big.offsetWidth;big.style.animation='';
-    SFX.yay();confetti();say(notOwned.length?'You got a new sticker!':'You got a sticker!');
+    SFX.yay();confetti();say(tr(notOwned.length?'newStkSay':'stkSay'));
     let done=false;const fin=()=>{if(done)return;done=true;SFX.tap();resolve()};
     $('#stkNext').onpointerup=e=>{e.preventDefault();fin()};
     setTimeout(()=>{if(my===flowId)fin()},7000);
@@ -636,7 +708,7 @@ function goBook(){
   STICKERS.forEach(s=>{const d=document.createElement('div');const own=S.stickers.includes(s);d.className='slot'+(own?'':' empty');d.textContent=own?s:'?';
     if(own)onTap(d,()=>{SFX.tap();wiggle(d)});g.appendChild(d)});
   $('#bookCount').textContent=`${S.stickers.length} / ${STICKERS.length}`;
-  say(S.stickers.length?`You have ${S.stickers.length} stickers!`:'Finish a road to get stickers!');
+  say(S.stickers.length?tr('haveStk')(S.stickers.length):tr('noStk'));
 }
 
 /* ---------- parent menu ---------- */
@@ -646,6 +718,9 @@ for(const ev of ['pointerup','pointercancel','pointerleave'])pc.addEventListener
 function openParent(){
   paused=true;hush();engineOff();touches.clear();
   $('#setSound').checked=S.settings.sound;$('#setVoice').checked=S.settings.voice;
+  document.querySelectorAll('[name=lang]').forEach(r=>r.checked=r.value===L());
+  document.querySelectorAll('[name=speed]').forEach(r=>r.checked=r.value===S.settings.speed);
+  fillVoiceMenus();
   document.querySelectorAll('[data-sub]').forEach(c=>c.checked=!!S.settings.subjects[c.dataset.sub]);
   document.querySelectorAll('[name=math]').forEach(r=>r.checked=r.value===S.settings.math);
   document.querySelectorAll('[name=per]').forEach(r=>r.checked=+r.value===S.settings.perLevel);
@@ -655,8 +730,29 @@ function readParent(){
   S.settings.sound=$('#setSound').checked;S.settings.voice=$('#setVoice').checked;
   document.querySelectorAll('[data-sub]').forEach(c=>S.settings.subjects[c.dataset.sub]=c.checked);
   const m=document.querySelector('[name=math]:checked');if(m)S.settings.math=m.value;
-  const p=document.querySelector('[name=per]:checked');if(p)S.settings.perLevel=+p.value;save();
+  const p=document.querySelector('[name=per]:checked');if(p)S.settings.perLevel=+p.value;
+  const lg=document.querySelector('[name=lang]:checked');if(lg)S.settings.lang=lg.value;
+  const sp=document.querySelector('[name=speed]:checked');if(sp)S.settings.speed=sp.value;
+  for(const [lang,id] of [['en','#voiceEn'],['es','#voiceEs']]){const sel=$(id),best=voiceList(lang)[0];if(sel.value)S.settings.voiceName[lang]=best&&sel.value===best.name?'':sel.value}
+  save();loadVoices();applyLang();
 }
+function fillVoiceMenus(){
+  for(const [lang,id] of [['en','#voiceEn'],['es','#voiceEs']]){
+    const sel=$(id),list=voiceList(lang),cur=voices[lang]?voices[lang].name:'';sel.innerHTML='';
+    if(!list.length){const o=document.createElement('option');o.value='';o.textContent='(no voices found)';sel.appendChild(o);continue}
+    list.forEach((v,i)=>{const o=document.createElement('option');o.value=v.name;o.textContent=v.name+' · '+v.lang+(i===0?'  ★ best':'');sel.appendChild(o)});
+    sel.value=cur||list[0].name;
+  }
+}
+function testVoice(lang){
+  readParent();
+  const line=lang==='es'?[['¡Hola!','es'],['¿Cuánto es','es'],['dos más uno?','es']]:[['Hi there!','en'],['What is','en'],['two plus one?','en']];
+  const was=S.settings.voice;S.settings.voice=true;say(line);S.settings.voice=was;
+}
+$('#testEn').onclick=()=>{audioInit();testVoice('en')};
+$('#testEs').onclick=()=>{audioInit();testVoice('es')};
+$('#voiceEn').onchange=$('#voiceEs').onchange=()=>readParent();
+document.querySelectorAll('[name=speed],[name=lang]').forEach(r=>r.onchange=()=>readParent());
 function closeParent(){readParent();$('#parent').classList.remove('on');paused=false;if(state==='race')engineOn()}
 $('#pClose').onclick=closeParent;
 $('#pMap').onclick=()=>{closeParent();if(S.buddy==null)goBuddy();else goMap()};
@@ -665,6 +761,7 @@ $('#pReset').onclick=()=>{if(confirm('Reset all progress and stickers?')){const 
 /* ---------- title ---------- */
 function goTitle(){flowId++;state='title';hush();engineOff();setTheme(THEMES[0],false);show('title')}
 $('#playBtn').addEventListener('click',()=>{unlock();SFX.tap();if(S.buddy==null)goBuddy();else goMap()});
+document.querySelectorAll('.lp').forEach(b=>b.addEventListener('click',()=>{unlock();S.settings.lang=b.dataset.lang;save();applyLang();SFX.tap();say(tr('hello'))}));
 onTap($('#bookBtn'),()=>{SFX.tap();goBook()});
 onTap($('#bookBack'),()=>{SFX.tap();goMap()});
 onTap($('#changeBuddy'),()=>{SFX.tap();goBuddy()});
@@ -673,7 +770,7 @@ document.addEventListener('visibilitychange',()=>{if(document.hidden){hush();eng
 (function makeIcon(){try{const c=document.createElement('canvas');c.width=c.height=180;const x=c.getContext('2d');const g=x.createLinearGradient(0,0,0,180);g.addColorStop(0,'#5fc0ff');g.addColorStop(.62,'#c9efff');g.addColorStop(.62,'#7ccf5a');g.addColorStop(1,'#5fb546');x.fillStyle=g;x.fillRect(0,0,180,180);
   x.font='118px "Apple Color Emoji","Segoe UI Emoji",sans-serif';x.textAlign='center';x.textBaseline='middle';x.fillText('🚗',90,104);$('#touchIcon').href=c.toDataURL('image/png')}catch(e){}})();
 
-resize();setTheme(THEMES[0],false);requestAnimationFrame(frame);
+applyLang();resize();setTheme(THEMES[0],false);requestAnimationFrame(frame);
 </script>
 </body>
 </html>
